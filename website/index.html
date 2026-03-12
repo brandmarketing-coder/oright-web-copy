@@ -99,6 +99,17 @@
       font-weight: 500; transition: background .12s;
     }
     .act-btn-green:hover { background: #047857; }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      #sidebar { display: none !important; }
+      #desktop-header { display: none !important; }
+      #mobile-header { display: flex !important; }
+      #view-copy { display: none !important; }
+    }
+    /* Mobile tab underline style */
+    .mobile-tab-btn { padding:8px 14px; font-size:13px; border:none; border-bottom:2px solid transparent; background:transparent; color:#64748b; cursor:pointer; font-weight:400; white-space:nowrap; transition:all .12s; }
+    .mobile-tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:600; }
   </style>
 </head>
 <body style="display:flex; height:100vh; overflow:hidden; font-family:'Helvetica Neue',Arial,'PingFang TC',sans-serif; background:#f1f5f9;">
@@ -126,7 +137,16 @@
   <!-- ─── Main ───────────────────────────────────────────────────────────── -->
   <div style="flex:1; display:flex; flex-direction:column; min-width:0; height:100%; overflow:hidden;">
 
-    <header style="background:#fff; border-bottom:1px solid #e2e8f0; padding:0 22px; height:50px; display:flex; align-items:center; gap:10px; flex-shrink:0;">
+    <!-- Mobile Header -->
+    <div id="mobile-header" style="display:none; background:#0f172a; color:#fff; height:52px; flex-shrink:0; align-items:center; padding:0 14px; gap:10px; border-bottom:1px solid #1e293b;">
+      <button id="btn-mobile-menu" style="width:34px; height:34px; border:none; background:transparent; color:#94a3b8; cursor:pointer; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span id="mobile-page-name" style="font-size:14px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc;">請選擇頁面</span>
+      <div id="mobile-status-badge"></div>
+    </div>
+
+    <header id="desktop-header" style="background:#fff; border-bottom:1px solid #e2e8f0; padding:0 22px; height:50px; display:flex; align-items:center; gap:10px; flex-shrink:0;">
       <h2 id="page-title" style="font-size:15px; font-weight:600; color:#0f172a; margin:0;"></h2>
       <span id="page-route" style="font-size:11.5px; color:#94a3b8; font-family:ui-monospace,monospace;"></span>
       <div style="flex:1;"></div>
@@ -208,6 +228,25 @@
         </div>
 
       </div>
+
+      <!-- Mobile copy view -->
+      <div id="view-mobile-copy" style="display:none; flex:1; flex-direction:column; overflow:hidden; background:#f1f5f9;">
+        <!-- Tab bar -->
+        <div id="mobile-tab-bar" style="background:#fff; border-bottom:1px solid #e2e8f0; padding:0 10px; flex-shrink:0; display:flex; align-items:flex-end; gap:0; overflow-x:auto;"></div>
+        <!-- Content -->
+        <div style="flex:1; overflow:hidden; display:flex; flex-direction:column; margin:10px 10px 0; background:#fff; border-radius:12px 12px 0 0; border:1px solid #e2e8f0; border-bottom:none;">
+          <div class="edit-zone" id="edit-zone-mobile" style="flex:1; overflow-y:auto; margin:12px 14px;">
+            <div class="rendered prose" id="mobile-rendered"></div>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div style="flex-shrink:0; background:#fff; border:1px solid #e2e8f0; border-top:1px solid #f1f5f9; margin:0 10px 10px; border-radius:0 0 12px 12px; padding:10px 14px; display:flex; align-items:center; gap:8px;">
+          <a id="btn-mobile-request-review" href="#" style="font-size:12px; color:#94a3b8; text-decoration:underline; cursor:pointer;" onclick="return false;">請求審查</a>
+          <div style="flex:1;"></div>
+          <button id="btn-mobile-set-official" class="act-btn-primary" style="display:none; font-size:12px; padding:5px 10px;">設為正式版</button>
+          <button id="btn-mobile-confirm" class="act-btn-green" style="font-size:12px; padding:5px 10px;">主管確認</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -220,6 +259,24 @@
         <button id="btn-conf-cancel" class="act-btn">取消</button>
         <button id="btn-conf-ok" class="act-btn-primary">確認</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer -->
+  <div id="mobile-drawer" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.5);">
+    <div style="position:absolute; top:0; left:0; bottom:0; width:260px; background:#0f172a; overflow-y:auto; display:flex; flex-direction:column;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 12px 10px; border-bottom:1px solid #1e293b; flex-shrink:0;">
+        <span style="font-size:12px; font-weight:600; color:#f8fafc; letter-spacing:.05em;">選擇頁面</span>
+        <button id="btn-close-drawer" style="width:28px; height:28px; border:none; background:transparent; color:#64748b; cursor:pointer; font-size:18px; border-radius:6px; display:flex; align-items:center; justify-content:center;">×</button>
+      </div>
+      <div style="padding:8px 8px 6px; border-bottom:1px solid #1e293b; flex-shrink:0;">
+        <a href="https://yjholt.readdy.co" target="_blank" rel="noopener"
+           style="display:flex; align-items:center; gap:6px; padding:7px 11px; background:#064e3b; border-radius:8px; color:#a7f3d0; font-size:12.5px; font-weight:500; text-decoration:none;">
+          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          Demo 網站
+        </a>
+      </div>
+      <nav id="mobile-nav-list" style="flex:1; padding:6px 8px;"></nav>
     </div>
   </div>
 
@@ -250,6 +307,7 @@
     let storage           = {};
     let confirmCb         = null;
     let collapseState     = {};
+    let mobileActiveTab   = -1;
 
     // ── Storage ───────────────────────────────────────────────────────────────
     function loadStorage() {
@@ -277,9 +335,11 @@
 
     // ── Views ──────────────────────────────────────────────────────────────────
     function showView(name) {
+      const mobile = window.innerWidth <= 768;
       document.getElementById('view-loading').style.display  = name === 'loading'  ? 'flex'  : 'none';
       document.getElementById('view-sitemap').style.display  = name === 'sitemap'  ? 'block' : 'none';
-      document.getElementById('view-copy').style.display     = name === 'copy'     ? 'flex'  : 'none';
+      document.getElementById('view-copy').style.display     = (!mobile && name === 'copy') ? 'flex' : 'none';
+      document.getElementById('view-mobile-copy').style.display = (mobile && name === 'copy') ? 'flex' : 'none';
     }
 
     // ── Sidebar nav ────────────────────────────────────────────────────────────
@@ -403,6 +463,7 @@
       const page = PAGES.find(p => p.id === pageId);
       document.getElementById('page-title').textContent = page.name;
       document.getElementById('page-route').textContent = page.route || '';
+      document.getElementById('mobile-page-name').textContent = page.name;
       showView('loading');
 
       if (page.isSiteMap) {
@@ -418,6 +479,7 @@
       catch { content = '> **載入失敗**：請透過 HTTP 伺服器開啟此頁（GitHub Pages 或 `python -m http.server`）。'; }
       document.getElementById('sitemap-content').innerHTML = marked.parse(content);
       updateStatusIndicator('');
+      updateMobileStatusBadge('');
       showView('sitemap');
     }
 
@@ -435,6 +497,10 @@
       renderOfficialContent(pd);
       updateStatusIndicator(pd.status);
       updateReviewBtn(pd.status);
+      mobileActiveTab = -1;
+      renderMobileView(pd);
+      updateMobileStatusBadge(pd.status);
+      updateMobileReviewBtn(pd.status);
       showView('copy');
     }
 
@@ -498,6 +564,7 @@
       save();
       renderTabs(pd);
       renderVersionContent(pd);
+      if (window.innerWidth <= 768) renderMobileView(pd);
     }
 
     // ── Add version ────────────────────────────────────────────────────────────
@@ -511,6 +578,7 @@
       save();
       renderTabs(pd);
       renderVersionContent(pd);
+      if (window.innerWidth <= 768) renderMobileView(pd);
     });
 
     // ── Reset version 1 ────────────────────────────────────────────────────────
@@ -751,6 +819,233 @@
     document.getElementById('btn-toggle-md-version').addEventListener('click', () => toggleMdView('version'));
     document.getElementById('btn-toggle-md-official').addEventListener('click', () => toggleMdView('official'));
 
+    // ── Mobile Nav ─────────────────────────────────────────────────────────────
+    function buildMobileNav() {
+      const nav = document.getElementById('mobile-nav-list');
+      nav.innerHTML = '';
+      function mDiv(label) {
+        const d = document.createElement('div');
+        d.style.cssText = 'font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#475569; padding:9px 8px 3px; font-weight:600;';
+        d.textContent = label;
+        nav.appendChild(d);
+      }
+      function mBtn(page, indented) {
+        const btn = document.createElement('button');
+        btn.dataset.id = page.id;
+        btn.dataset.mobileNav = 'true';
+        const pl = indented ? '22px' : '10px';
+        btn.style.cssText = `display:flex; align-items:center; width:100%; text-align:left; padding:6px ${pl}; border-radius:7px; font-size:${indented?'12':'12.5'}px; color:#94a3b8; background:transparent; border:none; cursor:pointer; transition:background .12s, color .12s;`;
+        const label = document.createElement('span'); label.textContent = page.name; btn.appendChild(label);
+        const badge = document.createElement('span'); badge.dataset.mobileBadgeFor = page.id; btn.appendChild(badge);
+        btn.onmouseover = () => { if (btn.dataset.id !== currentPageId) { btn.style.background='#1e293b'; btn.style.color='#f1f5f9'; } };
+        btn.onmouseout  = () => { if (btn.dataset.id !== currentPageId) { btn.style.background='transparent'; btn.style.color='#94a3b8'; } };
+        btn.addEventListener('click', () => { closeMobileDrawer(); navigate(page.id); });
+        nav.appendChild(btn);
+      }
+      mDiv('架構');    mBtn(PAGES[0]);
+      mDiv('主要頁面');
+      mBtn(PAGES[1]); mBtn(PAGES[8], true);
+      mBtn(PAGES[2]); mBtn(PAGES[3]); mBtn(PAGES[4]); mBtn(PAGES[5]);
+      mBtn(PAGES[6]); mBtn(PAGES[7], true);
+      mDiv('延伸頁面'); PAGES.slice(9).forEach(p => mBtn(p));
+    }
+
+    function highlightMobileNav(pageId) {
+      document.querySelectorAll('#mobile-nav-list button[data-id]').forEach(btn => {
+        const active = btn.dataset.id === pageId;
+        btn.style.background = active ? '#1e3a5f' : 'transparent';
+        btn.style.color      = active ? '#fff' : '#94a3b8';
+      });
+    }
+
+    function updateMobileNavBadge(pageId) {
+      const pd = getPage(pageId);
+      const badge = document.querySelector(`[data-mobile-badge-for="${pageId}"]`);
+      if (!badge) return;
+      badge.className = ''; badge.textContent = '';
+      if (!pd) return;
+      if (pd.status === 'review')     { badge.className = 'badge-review'; badge.textContent = '待審查'; }
+      else if (pd.status === 'confirmed') { badge.className = 'badge-confirmed'; badge.textContent = '已確認'; }
+    }
+
+    function openMobileDrawer() {
+      PAGES.forEach(p => { if (!p.isSiteMap) updateMobileNavBadge(p.id); });
+      highlightMobileNav(currentPageId);
+      document.getElementById('mobile-drawer').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileDrawer() {
+      document.getElementById('mobile-drawer').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('btn-mobile-menu').addEventListener('click', openMobileDrawer);
+    document.getElementById('btn-close-drawer').addEventListener('click', closeMobileDrawer);
+    document.getElementById('mobile-drawer').addEventListener('click', e => { if (e.target === e.currentTarget) closeMobileDrawer(); });
+
+    // ── Mobile Content ──────────────────────────────────────────────────────────
+    function renderMobileView(pd) {
+      renderMobileTabs(pd);
+      renderMobileContent(pd);
+      updateMobileFooter(pd);
+    }
+
+    function renderMobileTabs(pd) {
+      const bar = document.getElementById('mobile-tab-bar');
+      bar.innerHTML = '';
+
+      // Official tab (first)
+      const offBtn = document.createElement('button');
+      offBtn.className = 'mobile-tab-btn' + (mobileActiveTab === -1 ? ' active' : '');
+      offBtn.textContent = '正式版';
+      offBtn.addEventListener('click', () => switchMobileTab(-1));
+      bar.appendChild(offBtn);
+
+      // Version tabs
+      pd.versions.forEach((v, i) => {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex; align-items:center;';
+        const tab = document.createElement('button');
+        tab.className = 'mobile-tab-btn' + (mobileActiveTab === i ? ' active' : '');
+        tab.textContent = v.name;
+        tab.addEventListener('click', () => switchMobileTab(i));
+        wrap.appendChild(tab);
+        if (i > 0) {
+          const del = document.createElement('button');
+          del.textContent = '×';
+          del.style.cssText = 'width:16px; height:16px; border:none; background:transparent; color:#94a3b8; cursor:pointer; font-size:13px; padding:0; display:flex; align-items:center; justify-content:center;';
+          del.addEventListener('click', e => { e.stopPropagation(); deleteVersion(i); });
+          wrap.appendChild(del);
+        }
+        bar.appendChild(wrap);
+      });
+
+      // + button
+      const addBtn = document.createElement('button');
+      addBtn.textContent = '+';
+      addBtn.style.cssText = 'padding:6px 10px; font-size:16px; border:none; background:transparent; color:#94a3b8; cursor:pointer;';
+      addBtn.addEventListener('click', () => {
+        const p = getPage(currentPageId);
+        if (!p) return;
+        const src = p.versions[currentVersionIdx]?.content || '';
+        p.versions.push({ name: `版本${p.versions.length + 1}`, content: src });
+        currentVersionIdx = p.versions.length - 1;
+        p.activeIdx = currentVersionIdx;
+        save();
+        switchMobileTab(currentVersionIdx);
+      });
+      bar.appendChild(addBtn);
+    }
+
+    function renderMobileContent(pd) {
+      const html = mobileActiveTab === -1 ? (pd.official || '') : (pd.versions[mobileActiveTab]?.content || '');
+      document.getElementById('mobile-rendered').innerHTML = html;
+      const zone = document.getElementById('edit-zone-mobile');
+      zone.classList.remove('editing');
+      document.getElementById('mobile-rendered').contentEditable = 'false';
+    }
+
+    function switchMobileTab(tab) {
+      // Save current mobile edit if active
+      const zone = document.getElementById('edit-zone-mobile');
+      if (zone.classList.contains('editing')) saveMobileEditZone();
+      mobileActiveTab = tab;
+      const pd = getPage(currentPageId);
+      renderMobileView(pd);
+    }
+
+    function updateMobileFooter(pd) {
+      const isOfficial = mobileActiveTab === -1;
+      document.getElementById('btn-mobile-set-official').style.display = isOfficial ? 'none' : '';
+      updateMobileReviewBtn(pd ? pd.status : 'draft');
+    }
+
+    function updateMobileReviewBtn(status) {
+      const btn = document.getElementById('btn-mobile-request-review');
+      if (status === 'review') { btn.textContent = '取消審查'; btn.style.color = '#f97316'; }
+      else { btn.textContent = '請求審查'; btn.style.color = '#94a3b8'; }
+    }
+
+    function updateMobileStatusBadge(status) {
+      const el = document.getElementById('mobile-status-badge');
+      el.textContent = ''; el.className = '';
+      if (status === 'review')     { el.className = 'badge-review'; el.textContent = '待審查'; }
+      else if (status === 'confirmed') { el.className = 'badge-confirmed'; el.textContent = '已確認'; }
+    }
+
+    // Mobile inline editing
+    function saveMobileEditZone() {
+      const rendered = document.getElementById('mobile-rendered');
+      const html = rendered.innerHTML;
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      if (mobileActiveTab === -1) pd.official = html;
+      else if (pd.versions[mobileActiveTab]) pd.versions[mobileActiveTab].content = html;
+      save();
+      document.getElementById('edit-zone-mobile').classList.remove('editing');
+      rendered.contentEditable = 'false';
+    }
+
+    document.getElementById('mobile-rendered').addEventListener('click', () => {
+      const zone = document.getElementById('edit-zone-mobile');
+      if (zone.classList.contains('editing')) return;
+      zone.classList.add('editing');
+      const rendered = document.getElementById('mobile-rendered');
+      rendered.contentEditable = 'true';
+      rendered.focus();
+    });
+    document.getElementById('mobile-rendered').addEventListener('blur', () => saveMobileEditZone());
+    document.getElementById('mobile-rendered').addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveMobileEditZone(); }
+    });
+
+    // Mobile action buttons
+    document.getElementById('btn-mobile-set-official').addEventListener('click', () => {
+      showConfirm('設為正式版', '確定要將此版本設為正式版？', () => {
+        const pd = getPage(currentPageId);
+        if (!pd || mobileActiveTab < 0) return;
+        pd.official = pd.versions[mobileActiveTab]?.content || '';
+        save();
+        switchMobileTab(-1);
+      });
+    });
+
+    document.getElementById('btn-mobile-confirm').addEventListener('click', () => {
+      showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」。', () => {
+        const pd = getPage(currentPageId);
+        if (!pd) return;
+        pd.status = 'confirmed';
+        save();
+        updateNavBadge(currentPageId);
+        updateMobileNavBadge(currentPageId);
+        updateStatusIndicator(pd.status);
+        updateMobileStatusBadge(pd.status);
+        updateMobileReviewBtn(pd.status);
+        updateReviewBtn(pd.status);
+      });
+    });
+
+    document.getElementById('btn-mobile-request-review').addEventListener('click', () => {
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      if (pd.status === 'review') {
+        showConfirm('取消審查', '確定要取消審查？狀態將回到「草稿」。', () => {
+          pd.status = 'draft'; save();
+          updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
+          updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
+          updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
+        });
+      } else {
+        showConfirm('請求審查', '確定要送出進行審查？', () => {
+          pd.status = 'review'; save();
+          updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
+          updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
+          updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
+        });
+      }
+    });
+
     // ── Drag-resize panels ─────────────────────────────────────────────────────
     (function() {
       const handle   = document.getElementById('drag-handle');
@@ -790,6 +1085,7 @@
     // ── Init ───────────────────────────────────────────────────────────────────
     loadStorage();
     buildNav();
+    buildMobileNav();
     updateAllBadges();
     navigate('sitemap');
   </script>
