@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>O'right 官網重塑文案對照工具</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/turndown/dist/turndown.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/turndown-plugin-gfm/dist/turndown-plugin-gfm.js"></script>
+  <style>
+    /* Markdown prose */
+    .prose { color: #374151; font-size: 13.5px; }
+    .prose h1 { font-size: 1.3rem; font-weight: 700; margin: 1.2rem 0 .4rem; color: #111827; }
+    .prose h2 { font-size: 1.1rem; font-weight: 600; margin: 1.2rem 0 .4rem; color: #111827; border-bottom: 1px solid #f3f4f6; padding-bottom: .2rem; }
+    .prose h3 { font-size: .95rem; font-weight: 600; margin: 1rem 0 .3rem; color: #1f2937; }
+    .prose h4 { font-size: .875rem; font-weight: 600; margin: .75rem 0 .25rem; }
+    .prose p  { margin: .35rem 0; line-height: 1.65; }
+    .prose table { width: 100%; border-collapse: collapse; margin: .6rem 0; }
+    .prose th { background: #f9fafb; padding: .35rem .6rem; border: 1px solid #d1d5db; font-weight: 600; text-align: left; white-space: nowrap; font-size: 12px; }
+    .prose td { padding: .35rem .6rem; border: 1px solid #e5e7eb; vertical-align: top; line-height: 1.5; }
+    .prose tr:nth-child(even) td { background: #fafafa; }
+    .prose code { background: #f3f4f6; padding: .1rem .3rem; border-radius: .2rem; font-size: .8em; font-family: ui-monospace,monospace; }
+    .prose pre { background: #f8fafc; border: 1px solid #e2e8f0; padding: .75rem 1rem; border-radius: .5rem; overflow-x: auto; margin: .6rem 0; }
+    .prose pre code { background: none; padding: 0; font-size: .8rem; }
+    .prose ul { list-style: disc; padding-left: 1.4rem; margin: .35rem 0; }
+    .prose ol { list-style: decimal; padding-left: 1.4rem; margin: .35rem 0; }
+    .prose li { margin: .2rem 0; }
+    .prose blockquote { border-left: 3px solid #d1d5db; padding: .2rem .8rem; color: #6b7280; margin: .6rem 0; background: #f9fafb; border-radius: 0 .3rem .3rem 0; font-style: italic; }
+    .prose hr { border: none; border-top: 1px solid #f3f4f6; margin: .8rem 0; }
+    .prose strong { font-weight: 600; color: #111827; }
+
+    /* Editable content area */
+    .edit-zone { position: relative; min-height: 48px; border-radius: 6px; border: 1.5px dashed #cbd5e1; background: #fafbfc; }
+    .edit-zone::after {
+      content: '✎ 點擊以編輯';
+      position: absolute; top: 6px; right: 8px;
+      font-size: 11px; color: #2563eb; pointer-events: none;
+      background: #eff6ff; padding: 2px 8px; border-radius: 4px;
+      border: 1px solid #bfdbfe; font-weight: 500;
+    }
+    .edit-zone.editing { border-color: #2563eb; background: #fff; }
+    .edit-zone.editing::after { display: none; }
+    .edit-zone .rendered { cursor: text; padding: 6px 8px; }
+    .edit-zone.editing .rendered { outline: none; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+    /* Badge */
+    .badge-review    { display:inline-block; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:600; background:#fef3c7; color:#92400e; border:1px solid #fcd34d; margin-left:5px; }
+    .badge-confirmed { display:inline-block; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:600; background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; margin-left:5px; }
+
+    /* Markdown toggle button */
+    .md-toggle-btn { width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .md-toggle-btn:hover { border-color:#2563eb; color:#2563eb; background:#eff6ff; }
+    .md-toggle-btn.active { border-color:#2563eb; color:#2563eb; background:#dbeafe; }
+    .md-toggle-btn.active:hover { background:#bfdbfe; }
+
+    /* Markdown source textarea */
+    .md-textarea {
+      display: none; flex: 1; border: none; resize: none; outline: none;
+      font-family: ui-monospace, 'Cascadia Code', 'JetBrains Mono', monospace;
+      font-size: 12.5px; line-height: 1.65; padding: 14px 16px;
+      background: #1e293b; color: #e2e8f0; tab-size: 2;
+    }
+    .md-textarea:focus { background: #0f172a; }
+
+    /* Drag handle */
+    #drag-handle { width: 5px; flex-shrink: 0; cursor: col-resize; background: transparent; transition: background .15s; position: relative; }
+    #drag-handle:hover, #drag-handle.dragging { background: #2563eb; }
+    #drag-handle::after { content:''; position:absolute; inset:0 -3px; }
+
+    /* Action buttons */
+    .act-btn {
+      padding: 5px 13px; font-size: 12.5px; border: 1px solid #e5e7eb;
+      border-radius: 8px; background: #fff; color: #374151; cursor: pointer;
+      transition: background .12s, border-color .12s;
+    }
+    .act-btn:hover { background: #f9fafb; border-color: #d1d5db; }
+    .act-btn-primary {
+      padding: 5px 13px; font-size: 12.5px; border: none;
+      border-radius: 8px; background: #2563eb; color: #fff; cursor: pointer;
+      font-weight: 500; transition: background .12s;
+    }
+    .act-btn-primary:hover { background: #1d4ed8; }
+    .act-btn-amber {
+      padding: 5px 13px; font-size: 12.5px; border: none;
+      border-radius: 8px; background: #d97706; color: #fff; cursor: pointer;
+      font-weight: 500; transition: background .12s;
+    }
+    .act-btn-amber:hover { background: #b45309; }
+    .act-btn-green {
+      padding: 5px 13px; font-size: 12.5px; border: none;
+      border-radius: 8px; background: #059669; color: #fff; cursor: pointer;
+      font-weight: 500; transition: background .12s;
+    }
+    .act-btn-green:hover { background: #047857; }
+  </style>
+</head>
+<body style="display:flex; height:100vh; overflow:hidden; font-family:'Helvetica Neue',Arial,'PingFang TC',sans-serif; background:#f1f5f9;">
+
+  <!-- ─── Sidebar ─────────────────────────────────────────────────────────── -->
+  <aside id="sidebar" style="width:224px; min-width:224px; background:#0f172a; color:#fff; display:flex; flex-direction:column; height:100%; overflow-y:auto; flex-shrink:0;">
+
+    <div style="padding:14px 16px 10px; border-bottom:1px solid #1e293b;">
+      <div style="font-size:10px; color:#475569; letter-spacing:.08em; text-transform:uppercase; margin-bottom:3px;">O'right</div>
+      <div style="font-size:12.5px; font-weight:600; line-height:1.4; color:#f8fafc;">官網重塑<br>文案對照工具</div>
+    </div>
+
+    <div style="padding:8px 10px; border-bottom:1px solid #1e293b;">
+      <a href="https://yjholt.readdy.co" target="_blank" rel="noopener"
+         style="display:flex; align-items:center; gap:6px; padding:7px 11px; background:#064e3b; border-radius:8px; color:#a7f3d0; font-size:12.5px; font-weight:500; text-decoration:none; transition:background .15s;"
+         onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#064e3b'">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        Demo 網站
+      </a>
+    </div>
+
+    <nav style="flex:1; padding:6px 8px;" id="nav-list"></nav>
+  </aside>
+
+  <!-- ─── Main ───────────────────────────────────────────────────────────── -->
+  <div style="flex:1; display:flex; flex-direction:column; min-width:0; height:100%; overflow:hidden;">
+
+    <header style="background:#fff; border-bottom:1px solid #e2e8f0; padding:0 22px; height:50px; display:flex; align-items:center; gap:10px; flex-shrink:0;">
+      <h2 id="page-title" style="font-size:15px; font-weight:600; color:#0f172a; margin:0;"></h2>
+      <span id="page-route" style="font-size:11.5px; color:#94a3b8; font-family:ui-monospace,monospace;"></span>
+      <div style="flex:1;"></div>
+      <div id="status-indicator" style="display:none;"></div>
+    </header>
+
+    <div style="flex:1; overflow:hidden; padding:14px; display:flex; gap:10px;" id="content-wrap">
+
+      <!-- Loading -->
+      <div id="view-loading" style="flex:1; display:flex; align-items:center; justify-content:center; color:#94a3b8;">
+        <div style="text-align:center; font-size:14px;">載入中...</div>
+      </div>
+
+      <!-- Site Map -->
+      <div id="view-sitemap" style="display:none; flex:1; background:#fff; border-radius:12px; border:1px solid #e2e8f0; overflow-y:auto; padding:22px 26px;">
+        <div id="sitemap-content" class="prose"></div>
+      </div>
+
+      <!-- Copy view: versions + drag + official -->
+      <div id="view-copy" style="display:none; flex:1; gap:0; min-width:0; overflow:hidden;">
+
+        <!-- Versions panel -->
+        <div id="panel-versions" style="flex:2; min-width:200px; display:flex; flex-direction:column; background:#fff; border-radius:12px 0 0 12px; border:1px solid #e2e8f0; border-right:none; overflow:hidden;">
+          <!-- Tab bar -->
+          <div style="display:flex; align-items:center; border-bottom:1px solid #f1f5f9; padding:5px 10px; background:#f8fafc; flex-shrink:0; gap:3px; overflow-x:auto;">
+            <div id="version-tabs" style="display:flex; gap:3px; flex:1; align-items:center;"></div>
+            <button id="btn-add-version" title="新增版本"
+              style="width:26px; height:26px; border:1px dashed #cbd5e1; border-radius:7px; background:transparent; color:#94a3b8; font-size:17px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; line-height:1; transition:all .15s;"
+              onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb'"
+              onmouseout="this.style.borderColor='#cbd5e1';this.style.color='#94a3b8'">+</button>
+            <button id="btn-reset-version1" title="重設版本一為原始 .md 內容"
+              style="width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s;"
+              onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316';this.style.background='#fff7ed'"
+              onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff'">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </button>
+            <button id="btn-toggle-md-version" class="md-toggle-btn" title="切換為 Markdown 模式">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </button>
+          </div>
+          <!-- Editable content -->
+          <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;" id="version-edit-wrap">
+            <div class="edit-zone" id="edit-zone-version" style="flex:1; overflow-y:auto; margin:14px 16px;">
+              <div class="rendered prose" id="version-rendered"></div>
+            </div>
+            <textarea id="version-md-textarea" class="md-textarea" spellcheck="false"></textarea>
+          </div>
+          <!-- Footer actions -->
+          <div style="flex-shrink:0; border-top:1px solid #f1f5f9; padding:7px 12px; background:#f8fafc; display:flex; align-items:center; gap:6px;">
+            <a id="btn-request-review" href="#" style="font-size:12px; color:#94a3b8; text-decoration:underline; cursor:pointer;" onclick="return false;">請求審查</a>
+            <div style="flex:1;"></div>
+            <button id="btn-set-official" class="act-btn-primary">設為正式版</button>
+          </div>
+        </div>
+
+        <!-- Drag handle -->
+        <div id="drag-handle"></div>
+
+        <!-- Official panel -->
+        <div id="panel-official" style="flex:3; min-width:150px; display:flex; flex-direction:column; background:#fff; border-radius:0 12px 12px 0; border:1px solid #e2e8f0; border-left:none; overflow:hidden;">
+          <div style="border-bottom:1px solid #f1f5f9; padding:8px 14px; background:#f8fafc; flex-shrink:0; display:flex; align-items:center; gap:6px;">
+            <span style="font-size:12px; font-weight:600; color:#374151; letter-spacing:.03em;">正式版</span>
+            <span style="font-size:10.5px; color:#94a3b8; background:#f1f5f9; border-radius:4px; padding:1px 5px;">Official</span>
+            <div style="flex:1;"></div>
+            <button id="btn-toggle-md-official" class="md-toggle-btn" title="切換為 Markdown 模式">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </button>
+          </div>
+          <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;" id="official-edit-wrap">
+            <div class="edit-zone" id="edit-zone-official" style="flex:1; overflow-y:auto; margin:14px 16px;">
+              <div class="rendered prose" id="official-rendered"></div>
+            </div>
+            <textarea id="official-md-textarea" class="md-textarea" spellcheck="false"></textarea>
+          </div>
+          <div style="flex-shrink:0; border-top:1px solid #f1f5f9; padding:7px 12px; background:#f8fafc; display:flex; align-items:center; gap:6px;">
+            <div style="flex:1;"></div>
+            <button id="btn-confirm-official" class="act-btn-green">主管確認</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Confirm Dialog ────────────────────────────────────────────────── -->
+  <div id="confirm-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width:340px; padding:22px 24px; box-shadow:0 20px 50px rgba(0,0,0,.2);">
+      <div id="confirm-title" style="font-size:15px; font-weight:600; color:#0f172a; margin-bottom:6px;"></div>
+      <div id="confirm-body"  style="font-size:13px; color:#6b7280; line-height:1.55; margin-bottom:18px;"></div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button id="btn-conf-cancel" class="act-btn">取消</button>
+        <button id="btn-conf-ok" class="act-btn-primary">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Config ────────────────────────────────────────────────────────────────
+    const STORAGE_KEY = 'oright-copy-v3';  // v3: contenteditable editing, HTML storage
+
+    const PAGES = [
+      { id: 'sitemap',        name: 'Site Map',      file: '00_Site_Map.md',        isSiteMap: true },
+      { id: '01_首頁',         name: '首頁',           file: '01_首頁.md',             route: '/' },
+      { id: '02_關於我們',     name: '關於我們',       file: '02_關於我們.md',         route: '/about' },
+      { id: '03_綠色產品',     name: '綠色產品',       file: '03_綠色產品.md',         route: '/products' },
+      { id: '04_永續美妝',     name: '永續美妝',       file: '04_永續美妝.md',         route: '/sustainability' },
+      { id: '05_認證',         name: '認證',           file: '05_認證.md',             route: '/certification' },
+      { id: '06_最新消息',     name: '最新消息',       file: '06_最新消息.md',         route: '/news' },
+      { id: '07_新聞內頁',     name: '新聞內頁',       file: '07_新聞內頁.md',         route: '/news/:id' },
+      { id: '08_已參訪國家',   name: '已參訪國家',     file: '08_已參訪國家.md',       route: '/visited-countries' },
+      { id: '09_永續報告書',   name: '永續報告書',     file: '09_永續報告書.md',       route: '/csr' },
+      { id: '10_環境教育參訪', name: '環境教育參訪',   file: '10_環境教育參訪.md',     route: '/visit' },
+      { id: '12_聯絡我們',     name: '聯絡我們',       file: '12_聯絡我們.md',         route: '/contact' },
+      { id: '13_跨界合作',     name: '跨界合作',       file: '13_跨界合作.md',         route: '/cooperation' },
+      { id: '14_百貨體驗館',   name: '百貨體驗館',     file: '14_百貨體驗館.md',       route: '/store' },
+    ];
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let currentPageId     = null;
+    let currentVersionIdx = 0;
+    let storage           = {};
+    let confirmCb         = null;
+    let collapseState     = {};
+
+    // ── Storage ───────────────────────────────────────────────────────────────
+    function loadStorage() {
+      try { storage = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+      catch { storage = {}; }
+      if (!storage.pages) storage.pages = {};
+    }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)); }
+    function getPage(id) { return storage.pages[id]; }
+    function initPage(id, markdownContent) {
+      const html = marked.parse(markdownContent);
+      storage.pages[id] = { versions: [{ name: '版本1', content: html }], official: html, activeIdx: 0, status: 'draft' };
+      save();
+      return storage.pages[id];
+    }
+
+    // ── Fetch ──────────────────────────────────────────────────────────────────
+    async function fetchMd(file) {
+      // Try same directory (GitHub Pages deploy), then parent directory (local dev)
+      let r = await fetch(file);
+      if (!r.ok) r = await fetch('../' + file);
+      if (!r.ok) throw new Error(r.status);
+      return r.text();
+    }
+
+    // ── Views ──────────────────────────────────────────────────────────────────
+    function showView(name) {
+      document.getElementById('view-loading').style.display  = name === 'loading'  ? 'flex'  : 'none';
+      document.getElementById('view-sitemap').style.display  = name === 'sitemap'  ? 'block' : 'none';
+      document.getElementById('view-copy').style.display     = name === 'copy'     ? 'flex'  : 'none';
+    }
+
+    // ── Sidebar nav ────────────────────────────────────────────────────────────
+    function buildNav() {
+      const nav = document.getElementById('nav-list');
+      nav.innerHTML = '';
+      function divider(label) {
+        const d = document.createElement('div');
+        d.style.cssText = 'font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#475569; padding:9px 8px 3px; font-weight:600;';
+        d.textContent = label;
+        nav.appendChild(d);
+      }
+      divider('架構');
+      appendNavItem(PAGES[0]);                          // Site Map
+      divider('主要頁面');
+      appendNavItem(PAGES[1], [PAGES[8]]);              // 首頁 + 已參訪國家
+      appendNavItem(PAGES[2]);                          // 關於我們
+      appendNavItem(PAGES[3]);                          // 綠色產品
+      appendNavItem(PAGES[4]);                          // 永續美妝
+      appendNavItem(PAGES[5]);                          // 認證
+      appendNavItem(PAGES[6], [PAGES[7]]);              // 最新消息 + 新聞內頁
+      divider('延伸頁面');
+      PAGES.slice(9).forEach(p => appendNavItem(p));   // 永續報告書 ~ 百貨體驗館
+    }
+
+    function appendNavItem(page, children = []) {
+      const nav = document.getElementById('nav-list');
+      const hasChildren = children.length > 0;
+      if (hasChildren && collapseState[page.id] === undefined) collapseState[page.id] = false; // default: expanded
+      let childContainer = null;
+
+      if (hasChildren) {
+        // Row: [toggle arrow] [nav button]
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; align-items:center;';
+
+        const toggle = document.createElement('button');
+        toggle.style.cssText = 'width:18px; min-width:18px; height:28px; border:none; background:transparent; color:#475569; cursor:pointer; font-size:7px; padding:0; flex-shrink:0;';
+        toggle.textContent = collapseState[page.id] ? '▶' : '▼';
+        toggle.addEventListener('click', () => {
+          collapseState[page.id] = !collapseState[page.id];
+          toggle.textContent = collapseState[page.id] ? '▶' : '▼';
+          if (childContainer) childContainer.style.display = collapseState[page.id] ? 'none' : 'block';
+        });
+        row.appendChild(toggle);
+
+        const btn = document.createElement('button');
+        btn.dataset.id = page.id;
+        btn.style.cssText = 'display:flex; align-items:center; flex:1; min-width:0; text-align:left; padding:6px 8px; border-radius:7px; font-size:12.5px; color:#94a3b8; background:transparent; border:none; cursor:pointer; transition:background .12s, color .12s;';
+        const label = document.createElement('span'); label.textContent = page.name; btn.appendChild(label);
+        const badge = document.createElement('span'); badge.dataset.badgeFor = page.id; btn.appendChild(badge);
+        btn.onmouseover = () => { if (btn.dataset.id !== currentPageId) { btn.style.background = '#1e293b'; btn.style.color = '#f1f5f9'; } };
+        btn.onmouseout  = () => { if (btn.dataset.id !== currentPageId) { btn.style.background = 'transparent'; btn.style.color = '#94a3b8'; } };
+        btn.addEventListener('click', () => navigate(page.id));
+        row.appendChild(btn);
+        nav.appendChild(row);
+
+        childContainer = document.createElement('div');
+        childContainer.style.cssText = 'padding-left:18px;';
+        childContainer.style.display = collapseState[page.id] ? 'none' : 'block';
+        children.forEach(child => {
+          const cb = document.createElement('button');
+          cb.dataset.id = child.id;
+          cb.dataset.isChild = 'true';
+          cb.style.cssText = 'display:flex; align-items:center; width:100%; text-align:left; padding:5px 10px; border-radius:7px; font-size:12px; color:#64748b; background:transparent; border:none; cursor:pointer; transition:background .12s, color .12s;';
+          const cl = document.createElement('span'); cl.textContent = child.name; cb.appendChild(cl);
+          const cbadge = document.createElement('span'); cbadge.dataset.badgeFor = child.id; cb.appendChild(cbadge);
+          cb.onmouseover = () => { if (cb.dataset.id !== currentPageId) { cb.style.background = '#1e293b'; cb.style.color = '#f1f5f9'; } };
+          cb.onmouseout  = () => { if (cb.dataset.id !== currentPageId) { cb.style.background = 'transparent'; cb.style.color = '#64748b'; } };
+          cb.addEventListener('click', () => navigate(child.id));
+          childContainer.appendChild(cb);
+        });
+        nav.appendChild(childContainer);
+
+      } else {
+        const btn = document.createElement('button');
+        btn.dataset.id = page.id;
+        btn.style.cssText = 'display:flex; align-items:center; width:100%; text-align:left; padding:6px 10px; border-radius:7px; font-size:12.5px; color:#94a3b8; background:transparent; border:none; cursor:pointer; transition:background .12s, color .12s;';
+        const label = document.createElement('span'); label.textContent = page.name; btn.appendChild(label);
+        const badge = document.createElement('span'); badge.dataset.badgeFor = page.id; btn.appendChild(badge);
+        btn.onmouseover = () => { if (btn.dataset.id !== currentPageId) { btn.style.background = '#1e293b'; btn.style.color = '#f1f5f9'; } };
+        btn.onmouseout  = () => { if (btn.dataset.id !== currentPageId) { btn.style.background = 'transparent'; btn.style.color = '#94a3b8'; } };
+        btn.addEventListener('click', () => navigate(page.id));
+        nav.appendChild(btn);
+      }
+    }
+
+    function highlightNav(pageId) {
+      document.querySelectorAll('#nav-list button[data-id]').forEach(btn => {
+        const active = btn.dataset.id === pageId;
+        btn.style.background = active ? '#1e3a5f' : 'transparent';
+        btn.style.color      = active ? '#fff' : (btn.dataset.isChild ? '#64748b' : '#94a3b8');
+      });
+    }
+
+    function updateNavBadge(pageId) {
+      const pd = getPage(pageId);
+      const badge = document.querySelector(`[data-badge-for="${pageId}"]`);
+      if (!badge) return;
+      badge.className = '';
+      badge.textContent = '';
+      if (!pd) return;
+      if (pd.status === 'review') {
+        badge.className = 'badge-review'; badge.textContent = '待審查';
+      } else if (pd.status === 'confirmed') {
+        badge.className = 'badge-confirmed'; badge.textContent = '已確認';
+      }
+    }
+
+    function updateAllBadges() {
+      PAGES.forEach(p => { if (!p.isSiteMap) updateNavBadge(p.id); });
+    }
+
+    // ── Navigate ───────────────────────────────────────────────────────────────
+    async function navigate(pageId) {
+      // Save any open edit before navigating
+      saveActiveEdit();
+      currentPageId = pageId;
+      currentVersionIdx = 0;
+      highlightNav(pageId);
+      const page = PAGES.find(p => p.id === pageId);
+      document.getElementById('page-title').textContent = page.name;
+      document.getElementById('page-route').textContent = page.route || '';
+      showView('loading');
+
+      if (page.isSiteMap) {
+        await loadSiteMap(page);
+      } else {
+        await loadCopyPage(page);
+      }
+    }
+
+    async function loadSiteMap(page) {
+      let content;
+      try { content = await fetchMd(page.file); }
+      catch { content = '> **載入失敗**：請透過 HTTP 伺服器開啟此頁（GitHub Pages 或 `python -m http.server`）。'; }
+      document.getElementById('sitemap-content').innerHTML = marked.parse(content);
+      updateStatusIndicator('');
+      showView('sitemap');
+    }
+
+    async function loadCopyPage(page) {
+      let pd = getPage(page.id);
+      if (!pd) {
+        let content = '';
+        try { content = await fetchMd(page.file); }
+        catch { content = `> **載入失敗**：請透過 HTTP 伺服器開啟此頁。\n\n（檔案：${page.file}）`; }
+        pd = initPage(page.id, content);
+      }
+      currentVersionIdx = pd.activeIdx || 0;
+      renderTabs(pd);
+      renderVersionContent(pd);
+      renderOfficialContent(pd);
+      updateStatusIndicator(pd.status);
+      updateReviewBtn(pd.status);
+      showView('copy');
+    }
+
+    // ── Render ─────────────────────────────────────────────────────────────────
+    function renderTabs(pd) {
+      const container = document.getElementById('version-tabs');
+      container.innerHTML = '';
+      pd.versions.forEach((v, i) => {
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex; align-items:center;';
+        const isActive = i === currentVersionIdx;
+        const tab = document.createElement('button');
+        tab.style.cssText = `padding:4px 11px; font-size:12.5px; border-radius:7px; border:none; cursor:pointer; font-weight:${isActive?'600':'400'}; background:${isActive?'#2563eb':'transparent'}; color:${isActive?'#fff':'#64748b'}; transition:all .12s;`;
+        tab.textContent = v.name;
+        if (!isActive) {
+          tab.onmouseover = () => { tab.style.background='#f1f5f9'; tab.style.color='#374151'; };
+          tab.onmouseout  = () => { tab.style.background='transparent'; tab.style.color='#64748b'; };
+        }
+        tab.addEventListener('click', () => { saveActiveEdit(); switchVersion(i); });
+        wrap.appendChild(tab);
+        if (i > 0) {
+          const del = document.createElement('button');
+          del.textContent = '×'; del.title = '刪除此版本';
+          del.style.cssText = 'width:17px; height:17px; border:none; background:transparent; color:#94a3b8; cursor:pointer; border-radius:4px; font-size:13px; display:flex; align-items:center; justify-content:center; padding:0; transition:all .12s;';
+          del.onmouseover = () => { del.style.background='#fee2e2'; del.style.color='#ef4444'; };
+          del.onmouseout  = () => { del.style.background='transparent'; del.style.color='#94a3b8'; };
+          del.addEventListener('click', e => { e.stopPropagation(); deleteVersion(i); });
+          wrap.appendChild(del);
+        }
+        container.appendChild(wrap);
+      });
+    }
+
+    function renderVersionContent(pd) {
+      resetMdView('version');
+      document.getElementById('version-rendered').innerHTML = pd.versions[currentVersionIdx]?.content || '';
+      exitEditZone('version');
+    }
+
+    function renderOfficialContent(pd) {
+      resetMdView('official');
+      document.getElementById('official-rendered').innerHTML = pd.official || '';
+      exitEditZone('official');
+    }
+
+    function switchVersion(idx) {
+      currentVersionIdx = idx;
+      const pd = getPage(currentPageId);
+      pd.activeIdx = idx;
+      save();
+      renderTabs(pd);
+      renderVersionContent(pd);
+    }
+
+    function deleteVersion(idx) {
+      const pd = getPage(currentPageId);
+      if (!pd || pd.versions.length <= 1) return;
+      pd.versions.splice(idx, 1);
+      if (currentVersionIdx >= pd.versions.length) currentVersionIdx = pd.versions.length - 1;
+      pd.activeIdx = currentVersionIdx;
+      save();
+      renderTabs(pd);
+      renderVersionContent(pd);
+    }
+
+    // ── Add version ────────────────────────────────────────────────────────────
+    document.getElementById('btn-add-version').addEventListener('click', () => {
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      const src = pd.versions[currentVersionIdx]?.content || '';
+      pd.versions.push({ name: `版本${pd.versions.length + 1}`, content: src });
+      currentVersionIdx = pd.versions.length - 1;
+      pd.activeIdx = currentVersionIdx;
+      save();
+      renderTabs(pd);
+      renderVersionContent(pd);
+    });
+
+    // ── Reset version 1 ────────────────────────────────────────────────────────
+    document.getElementById('btn-reset-version1').addEventListener('click', () => {
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      const page = PAGES.find(p => p.id === currentPageId);
+      showConfirm('重設版本一', '確定要將版本一恢復為原始 .md 檔案內容？此操作無法復原。', async () => {
+        let content = '';
+        try { content = await fetchMd(page.file); }
+        catch { content = `> 載入失敗（${page.file}）`; }
+        const html = marked.parse(content);
+        pd.versions[0].content = html;
+        save();
+        if (currentVersionIdx === 0) {
+          renderTabs(pd);
+          renderVersionContent(pd);
+        }
+      });
+    });
+
+    // ── Inline editing (contenteditable) ───────────────────────────────────────
+    function enterEditZone(which) {
+      const zone     = document.getElementById(`edit-zone-${which}`);
+      const rendered = document.getElementById(`${which}-rendered`);
+      if (zone.classList.contains('editing')) return;
+      zone.classList.add('editing');
+      rendered.contentEditable = 'true';
+      rendered.focus();
+      // Move caret to end
+      const sel = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(rendered);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    function exitEditZone(which) {
+      const zone     = document.getElementById(`edit-zone-${which}`);
+      const rendered = document.getElementById(`${which}-rendered`);
+      zone.classList.remove('editing');
+      rendered.contentEditable = 'false';
+    }
+
+    function saveEditZone(which) {
+      const rendered = document.getElementById(`${which}-rendered`);
+      const html = rendered.innerHTML;
+      const pd   = getPage(currentPageId);
+      if (!pd) return;
+      if (which === 'version') {
+        pd.versions[currentVersionIdx].content = html;
+      } else {
+        pd.official = html;
+      }
+      save();
+      exitEditZone(which);
+    }
+
+    function saveActiveEdit() {
+      if (document.getElementById('edit-zone-version').classList.contains('editing'))  saveEditZone('version');
+      if (document.getElementById('edit-zone-official').classList.contains('editing')) saveEditZone('official');
+      if (mdMode.version)  saveMdZone('version');
+      if (mdMode.official) saveMdZone('official');
+    }
+
+    // Click on rendered → enter edit
+    document.getElementById('version-rendered').addEventListener('click', () => enterEditZone('version'));
+    document.getElementById('official-rendered').addEventListener('click', () => enterEditZone('official'));
+
+    // Blur → save
+    document.getElementById('version-rendered').addEventListener('blur',  () => saveEditZone('version'));
+    document.getElementById('official-rendered').addEventListener('blur', () => saveEditZone('official'));
+
+    // Ctrl/Cmd+S → save but stay in edit
+    function handleEditKey(e, which) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveEditZone(which);
+        enterEditZone(which);
+      }
+    }
+    document.getElementById('version-rendered').addEventListener('keydown',  e => handleEditKey(e, 'version'));
+    document.getElementById('official-rendered').addEventListener('keydown', e => handleEditKey(e, 'official'));
+
+    // ── Set as official ────────────────────────────────────────────────────────
+    document.getElementById('btn-set-official').addEventListener('click', () => {
+      showConfirm('設為正式版', '確定要將此版本設為正式版？正式版的現有內容將被覆蓋。', () => {
+        const pd = getPage(currentPageId);
+        if (!pd) return;
+        const html = pd.versions[currentVersionIdx]?.content || '';
+        pd.official = html;
+        save();
+        document.getElementById('official-rendered').innerHTML = html;
+        exitEditZone('official');
+      });
+    });
+
+    // ── Request / cancel review ────────────────────────────────────────────────
+    function updateReviewBtn(status) {
+      const btn = document.getElementById('btn-request-review');
+      if (status === 'review') {
+        btn.textContent = '取消審查';
+        btn.style.color = '#f97316';
+      } else {
+        btn.textContent = '請求審查';
+        btn.style.color = '#94a3b8';
+      }
+    }
+
+    document.getElementById('btn-request-review').addEventListener('click', () => {
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      if (pd.status === 'review') {
+        showConfirm('取消審查', '確定要取消審查？狀態將回到「草稿」。', () => {
+          pd.status = 'draft';
+          save();
+          updateNavBadge(currentPageId);
+          updateStatusIndicator(pd.status);
+          updateReviewBtn(pd.status);
+        });
+      } else {
+        showConfirm('請求審查', '確定要送出此版本進行審查？狀態將更新為「待審查」。', () => {
+          pd.status = 'review';
+          save();
+          updateNavBadge(currentPageId);
+          updateStatusIndicator(pd.status);
+          updateReviewBtn(pd.status);
+        });
+      }
+    });
+
+    // ── Manager confirm ────────────────────────────────────────────────────────
+    document.getElementById('btn-confirm-official').addEventListener('click', () => {
+      showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」。', () => {
+        const pd = getPage(currentPageId);
+        if (!pd) return;
+        pd.status = 'confirmed';
+        save();
+        updateNavBadge(currentPageId);
+        updateStatusIndicator(pd.status);
+      });
+    });
+
+    function updateStatusIndicator(status) {
+      const el = document.getElementById('status-indicator');
+      el.style.display = 'none';
+      el.textContent = '';
+      el.className = '';
+      if (status === 'review') {
+        el.style.display = 'inline-block';
+        el.className = 'badge-review';
+        el.textContent = '待審查';
+      } else if (status === 'confirmed') {
+        el.style.display = 'inline-block';
+        el.className = 'badge-confirmed';
+        el.textContent = '已確認';
+      }
+    }
+
+    // ── Confirm dialog (shared) ────────────────────────────────────────────────
+    function showConfirm(title, body, cb) {
+      confirmCb = cb;
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-body').textContent  = body;
+      document.getElementById('confirm-overlay').style.display = 'flex';
+    }
+
+    document.getElementById('btn-conf-cancel').addEventListener('click', () => {
+      document.getElementById('confirm-overlay').style.display = 'none';
+      confirmCb = null;
+    });
+    document.getElementById('btn-conf-ok').addEventListener('click', () => {
+      document.getElementById('confirm-overlay').style.display = 'none';
+      if (confirmCb) { confirmCb(); confirmCb = null; }
+    });
+    document.getElementById('confirm-overlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) { document.getElementById('confirm-overlay').style.display = 'none'; confirmCb = null; }
+    });
+
+    // ── Markdown toggle view ────────────────────────────────────────────────────
+    const iconCode = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
+    const iconEye  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    let mdMode = { version: false, official: false };
+
+    function makeTurndown() {
+      const td = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' });
+      if (typeof turndownPluginGfm !== 'undefined') td.use(turndownPluginGfm.gfm);
+      return td;
+    }
+
+    function saveMdZone(which) {
+      const md = document.getElementById(`${which}-md-textarea`).value;
+      const html = marked.parse(md);
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      if (which === 'version') pd.versions[currentVersionIdx].content = html;
+      else pd.official = html;
+      save();
+      document.getElementById(`${which}-rendered`).innerHTML = html;
+    }
+
+    function resetMdView(which) {
+      if (!mdMode[which]) return;
+      const btn = document.getElementById(`btn-toggle-md-${which}`);
+      document.getElementById(`edit-zone-${which}`).style.display = '';
+      document.getElementById(`${which}-md-textarea`).style.display = 'none';
+      if (btn) { btn.innerHTML = iconCode; btn.title = '切換為 Markdown 模式'; btn.classList.remove('active'); }
+      mdMode[which] = false;
+    }
+
+    function toggleMdView(which) {
+      const editZone = document.getElementById(`edit-zone-${which}`);
+      const textarea = document.getElementById(`${which}-md-textarea`);
+      const btn = document.getElementById(`btn-toggle-md-${which}`);
+
+      if (!mdMode[which]) {
+        // Enter MD view: save any pending edit, convert HTML → MD
+        saveEditZone(which);
+        const html = document.getElementById(`${which}-rendered`).innerHTML;
+        try { textarea.value = makeTurndown().turndown(html); }
+        catch (e) { textarea.value = ''; }
+        editZone.style.display = 'none';
+        textarea.style.display = 'block';
+        textarea.focus();
+        mdMode[which] = true;
+        btn.innerHTML = iconEye; btn.title = '切換為預覽模式'; btn.classList.add('active');
+      } else {
+        // Exit MD view: parse MD → HTML, save, restore rendered view
+        saveMdZone(which);
+        editZone.style.display = '';
+        textarea.style.display = 'none';
+        mdMode[which] = false;
+        btn.innerHTML = iconCode; btn.title = '切換為 Markdown 模式'; btn.classList.remove('active');
+      }
+    }
+
+    document.getElementById('btn-toggle-md-version').addEventListener('click', () => toggleMdView('version'));
+    document.getElementById('btn-toggle-md-official').addEventListener('click', () => toggleMdView('official'));
+
+    // ── Drag-resize panels ─────────────────────────────────────────────────────
+    (function() {
+      const handle   = document.getElementById('drag-handle');
+      const pV       = document.getElementById('panel-versions');
+      const pO       = document.getElementById('panel-official');
+      const container = document.getElementById('view-copy');
+      let dragging = false, startX = 0, startVW = 0, totalW = 0;
+
+      handle.addEventListener('mousedown', e => {
+        dragging = true;
+        startX   = e.clientX;
+        startVW  = pV.getBoundingClientRect().width;
+        totalW   = pV.getBoundingClientRect().width + pO.getBoundingClientRect().width;
+        handle.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const delta = e.clientX - startX;
+        const newVW = Math.max(200, Math.min(totalW - 150, startVW + delta));
+        pV.style.flex = 'none'; pV.style.width = newVW + 'px';
+        pO.style.flex = 'none'; pO.style.width = (totalW - newVW) + 'px';
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false;
+        handle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      });
+    })();
+
+    // ── Init ───────────────────────────────────────────────────────────────────
+    loadStorage();
+    buildNav();
+    updateAllBadges();
+    navigate('sitemap');
+  </script>
+</body>
+</html>
