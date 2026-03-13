@@ -381,6 +381,7 @@
     let confirmCb         = null;
     let collapseState     = {};
     let mobileActiveTab   = -1;
+    let editDirty         = { version: false, official: false };
 
     // ── Storage ───────────────────────────────────────────────────────────────
 
@@ -690,6 +691,12 @@
         [...oDoc.querySelectorAll(DIFF_LEAF)].map(normTxt).filter(Boolean)
       );
 
+      // Strip any residual diff styles from stored HTML before re-applying
+      vDoc.querySelectorAll('[style]').forEach(el => {
+        el.style.background = ''; el.style.borderRadius = '';
+        if (!el.getAttribute('style').trim()) el.removeAttribute('style');
+      });
+
       [...vDoc.querySelectorAll(DIFF_LEAF)].forEach(el => {
         const txt = normTxt(el);
         if (!txt) return;
@@ -791,6 +798,7 @@
       if (zone.classList.contains('editing')) return;
       zone.classList.add('editing');
       rendered.contentEditable = 'true';
+      editDirty[which] = false;
       rendered.focus();
       // Move caret to end
       const sel = window.getSelection();
@@ -809,6 +817,10 @@
     }
 
     function saveEditZone(which) {
+      const dirty = editDirty[which];
+      editDirty[which] = false;
+      if (!dirty) { exitEditZone(which); return; }
+
       const rendered = document.getElementById(`${which}-rendered`);
       // Strip any diff highlight styles that may have been pasted in
       const cleanHtml = (() => {
@@ -860,6 +872,10 @@
       syncScroll(e, 'official-rendered', 'version-rendered');
       enterEditZone('official');
     });
+
+    // Input → mark dirty
+    document.getElementById('version-rendered').addEventListener('input',  () => { editDirty.version  = true; });
+    document.getElementById('official-rendered').addEventListener('input', () => { editDirty.official = true; });
 
     // Blur → save
     document.getElementById('version-rendered').addEventListener('blur',  () => saveEditZone('version'));
