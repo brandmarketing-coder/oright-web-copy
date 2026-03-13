@@ -31,9 +31,10 @@
     .prose hr { border: none; border-top: 1px solid #f3f4f6; margin: .8rem 0; }
     .prose strong { font-weight: 600; color: #111827; }
 
-    /* Mobile table: horizontally scrollable with min column width */
+    /* Scrollable table wrapper (applied via JS on mobile) */
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: .6rem 0; }
+    .table-scroll table { width: auto; min-width: 100%; margin: 0; }
     @media (max-width: 768px) {
-      .prose table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
       .prose td { min-width: 80px; }
     }
 
@@ -154,8 +155,6 @@
       <span id="mobile-page-name" style="font-size:14px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc; min-width:0;">請選擇頁面</span>
       <span id="sync-status-mobile" style="display:none;"></span>
       <div id="mobile-status-badge" style="flex-shrink:0;"></div>
-      <button id="btn-diff-mobile" title="顯示與正式版的差異"
-        style="width:28px; height:28px; border:1px solid #334155; border-radius:7px; background:transparent; color:#94a3b8; cursor:pointer; font-size:10px; font-weight:700; letter-spacing:-.5px; flex-shrink:0; display:none;">≠</button>
       <button id="btn-help-mobile" title="使用說明" style="width:28px; height:28px; border:1px solid #334155; border-radius:7px; background:transparent; color:#94a3b8; cursor:pointer; font-size:12px; font-weight:600; flex-shrink:0;">i</button>
       <button id="btn-save-mobile" title="立即儲存" style="padding:4px 10px; font-size:12px; border:none; border-radius:7px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; flex-shrink:0;">儲存</button>
     </div>
@@ -699,6 +698,18 @@
     }
 
     const DIFF_LEAF = 'td, th, p, li, h1, h2, h3, h4, h5, h6';
+
+    // Wrap every <table> in a horizontally-scrollable div for mobile
+    function wrapTablesForScroll(html) {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      doc.querySelectorAll('table').forEach(table => {
+        const wrapper = doc.createElement('div');
+        wrapper.className = 'table-scroll';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+      return doc.body.innerHTML;
+    }
     const normTxt = el => el.textContent.replace(/\s+/g, ' ').trim();
 
     function buildDiffHtml(vHtml, oHtml) {
@@ -733,12 +744,6 @@
         btn.style.background  = on ? '#f5f3ff' : '#fff';
         btn.style.borderColor = on ? '#7c3aed' : '#e2e8f0';
         btn.style.color       = on ? '#7c3aed' : '#64748b';
-      }
-      const mbtn = document.getElementById('btn-diff-mobile');
-      if (mbtn) {
-        mbtn.style.background  = on ? 'rgba(124,58,237,.25)' : 'transparent';
-        mbtn.style.borderColor = on ? '#7c3aed' : '#334155';
-        mbtn.style.color       = on ? '#c4b5fd' : '#94a3b8';
       }
     }
 
@@ -1125,11 +1130,6 @@
       if (pd) renderVersionContent(pd);
     });
 
-    document.getElementById('btn-diff-mobile').addEventListener('click', () => {
-      setDiffMode(!diffMode);
-      const pd = getPage(currentPageId);
-      if (pd) renderMobileContent(pd);
-    });
 
     // ── Mobile Nav ─────────────────────────────────────────────────────────────
     function buildMobileNav() {
@@ -1253,16 +1253,13 @@
     function renderMobileContent(pd) {
       const isOfficial = mobileActiveTab === -1;
       const vHtml = isOfficial ? (pd.official || '') : (pd.versions[mobileActiveTab]?.content || '');
-      const html = (!isOfficial && diffMode && pd.official)
+      const rawHtml = (!isOfficial && diffMode && pd.official)
         ? buildDiffHtml(vHtml, pd.official)
         : vHtml;
-      document.getElementById('mobile-rendered').innerHTML = html;
+      document.getElementById('mobile-rendered').innerHTML = wrapTablesForScroll(rawHtml);
       const zone = document.getElementById('edit-zone-mobile');
       zone.classList.remove('editing');
       document.getElementById('mobile-rendered').contentEditable = 'false';
-      // Show diff button only on version tabs
-      const mbtn = document.getElementById('btn-diff-mobile');
-      if (mbtn) mbtn.style.display = isOfficial ? 'none' : '';
     }
 
     // Find the heading currently visible near the top of the mobile scroll area
