@@ -1109,6 +1109,8 @@
     function makeTurndown() {
       const td = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' });
       if (typeof turndownPluginGfm !== 'undefined') td.use(turndownPluginGfm.gfm);
+      // Preserve <br> as literal HTML — a bare newline breaks GFM table cells on re-parse
+      td.addRule('br', { filter: 'br', replacement: () => '<br>' });
       return td;
     }
 
