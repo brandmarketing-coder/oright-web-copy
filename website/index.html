@@ -143,6 +143,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <span id="mobile-page-name" style="font-size:14px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc;">請選擇頁面</span>
+      <span id="sync-status-mobile" style="font-size:10px; color:#475569; flex-shrink:0;"></span>
       <div id="mobile-status-badge"></div>
     </div>
 
@@ -150,6 +151,7 @@
       <h2 id="page-title" style="font-size:15px; font-weight:600; color:#0f172a; margin:0;"></h2>
       <span id="page-route" style="font-size:11.5px; color:#94a3b8; font-family:ui-monospace,monospace;"></span>
       <div style="flex:1;"></div>
+      <span id="sync-status" style="font-size:11px; color:#94a3b8;"></span>
       <div id="status-indicator" style="display:none;"></div>
     </header>
 
@@ -284,6 +286,11 @@
     // ── Config ────────────────────────────────────────────────────────────────
     const STORAGE_KEY = 'oright-copy-v3';  // v3: contenteditable editing, HTML storage
 
+    // ── Sync config (injected by GitHub Actions from Secrets) ─────────────────
+    const JSONBIN_KEY = 'PLACEHOLDER_JSONBIN_KEY';
+    const JSONBIN_BIN = 'PLACEHOLDER_JSONBIN_BIN';
+    const SYNC_ON = JSONBIN_KEY !== 'PLACEHOLDER_JSONBIN_KEY' && JSONBIN_BIN !== 'PLACEHOLDER_JSONBIN_BIN';
+
     const PAGES = [
       { id: 'sitemap',        name: 'Site Map',      file: '00_Site_Map.md',        isSiteMap: true },
       { id: '01_首頁',         name: '首頁',           file: '01_首頁.md',             route: '/' },
@@ -310,12 +317,61 @@
     let mobileActiveTab   = -1;
 
     // ── Storage ───────────────────────────────────────────────────────────────
-    function loadStorage() {
+    let _saveTimer = null;
+
+    async function loadStorage() {
+      // Load from localStorage first (instant)
       try { storage = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
       catch { storage = {}; }
       if (!storage.pages) storage.pages = {};
+
+      // Then pull latest from JSONBin (authoritative cross-device source)
+      if (SYNC_ON) {
+        showSyncStatus('syncing');
+        try {
+          const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_KEY, 'X-Bin-Meta': 'false' }
+          });
+          if (r.ok) {
+            const data = await r.json();
+            if (data && data.pages) {
+              storage = data;
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+            }
+            showSyncStatus('synced');
+          } else { showSyncStatus('offline'); }
+        } catch { showSyncStatus('offline'); }
+      }
     }
-    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)); }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+      if (!SYNC_ON) return;
+      showSyncStatus('pending');
+      clearTimeout(_saveTimer);
+      _saveTimer = setTimeout(async () => {
+        showSyncStatus('syncing');
+        try {
+          const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+            body: JSON.stringify(storage)
+          });
+          showSyncStatus(r.ok ? 'synced' : 'error');
+        } catch { showSyncStatus('error'); }
+      }, 1200);
+    }
+
+    function showSyncStatus(s) {
+      const map = { syncing:'同步中…', synced:'已同步 ✓', pending:'待同步', offline:'離線', error:'同步失敗' };
+      const col = { syncing:'#94a3b8', synced:'#10b981', pending:'#f59e0b', offline:'#94a3b8', error:'#ef4444' };
+      const txt = SYNC_ON ? (map[s] || '') : '';
+      const c   = SYNC_ON ? (col[s] || '#94a3b8') : '#94a3b8';
+      const d = document.getElementById('sync-status');
+      const m = document.getElementById('sync-status-mobile');
+      if (d) { d.textContent = txt; d.style.color = c; }
+      if (m) { m.textContent = txt; m.style.color = c; }
+    }
     function getPage(id) { return storage.pages[id]; }
     function initPage(id, markdownContent) {
       const html = marked.parse(markdownContent);
@@ -1083,11 +1139,13 @@
     })();
 
     // ── Init ───────────────────────────────────────────────────────────────────
-    loadStorage();
-    buildNav();
-    buildMobileNav();
-    updateAllBadges();
-    navigate('sitemap');
+    (async () => {
+      await loadStorage();
+      buildNav();
+      buildMobileNav();
+      updateAllBadges();
+      navigate('sitemap');
+    })();
   </script>
 </body>
 </html>
