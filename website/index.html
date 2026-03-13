@@ -31,6 +31,12 @@
     .prose hr { border: none; border-top: 1px solid #f3f4f6; margin: .8rem 0; }
     .prose strong { font-weight: 600; color: #111827; }
 
+    /* Mobile table: horizontally scrollable with min column width */
+    @media (max-width: 768px) {
+      .prose table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .prose td { min-width: 80px; }
+    }
+
     /* Editable content area */
     .edit-zone { position: relative; min-height: 48px; border-radius: 6px; border: 1.5px dashed #cbd5e1; background: #fafbfc; }
     .edit-zone::after {
@@ -148,6 +154,8 @@
       <span id="mobile-page-name" style="font-size:14px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc; min-width:0;">請選擇頁面</span>
       <span id="sync-status-mobile" style="display:none;"></span>
       <div id="mobile-status-badge" style="flex-shrink:0;"></div>
+      <button id="btn-diff-mobile" title="顯示與正式版的差異"
+        style="width:28px; height:28px; border:1px solid #334155; border-radius:7px; background:transparent; color:#94a3b8; cursor:pointer; font-size:10px; font-weight:700; letter-spacing:-.5px; flex-shrink:0; display:none;">≠</button>
       <button id="btn-help-mobile" title="使用說明" style="width:28px; height:28px; border:1px solid #334155; border-radius:7px; background:transparent; color:#94a3b8; cursor:pointer; font-size:12px; font-weight:600; flex-shrink:0;">i</button>
       <button id="btn-save-mobile" title="立即儲存" style="padding:4px 10px; font-size:12px; border:none; border-radius:7px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; flex-shrink:0;">儲存</button>
     </div>
@@ -720,11 +728,18 @@
     function setDiffMode(on) {
       diffMode = on;
       const btn = document.getElementById('btn-diff');
-      if (!btn) return;
-      btn.dataset.on = on ? '1' : '';
-      btn.style.background    = on ? '#f5f3ff' : '#fff';
-      btn.style.borderColor   = on ? '#7c3aed' : '#e2e8f0';
-      btn.style.color         = on ? '#7c3aed' : '#64748b';
+      if (btn) {
+        btn.dataset.on = on ? '1' : '';
+        btn.style.background  = on ? '#f5f3ff' : '#fff';
+        btn.style.borderColor = on ? '#7c3aed' : '#e2e8f0';
+        btn.style.color       = on ? '#7c3aed' : '#64748b';
+      }
+      const mbtn = document.getElementById('btn-diff-mobile');
+      if (mbtn) {
+        mbtn.style.background  = on ? 'rgba(124,58,237,.25)' : 'transparent';
+        mbtn.style.borderColor = on ? '#7c3aed' : '#334155';
+        mbtn.style.color       = on ? '#c4b5fd' : '#94a3b8';
+      }
     }
 
     function renderVersionContent(pd) {
@@ -1110,6 +1125,12 @@
       if (pd) renderVersionContent(pd);
     });
 
+    document.getElementById('btn-diff-mobile').addEventListener('click', () => {
+      setDiffMode(!diffMode);
+      const pd = getPage(currentPageId);
+      if (pd) renderMobileContent(pd);
+    });
+
     // ── Mobile Nav ─────────────────────────────────────────────────────────────
     function buildMobileNav() {
       const nav = document.getElementById('mobile-nav-list');
@@ -1230,20 +1251,54 @@
     }
 
     function renderMobileContent(pd) {
-      const html = mobileActiveTab === -1 ? (pd.official || '') : (pd.versions[mobileActiveTab]?.content || '');
+      const isOfficial = mobileActiveTab === -1;
+      const vHtml = isOfficial ? (pd.official || '') : (pd.versions[mobileActiveTab]?.content || '');
+      const html = (!isOfficial && diffMode && pd.official)
+        ? buildDiffHtml(vHtml, pd.official)
+        : vHtml;
       document.getElementById('mobile-rendered').innerHTML = html;
       const zone = document.getElementById('edit-zone-mobile');
       zone.classList.remove('editing');
       document.getElementById('mobile-rendered').contentEditable = 'false';
+      // Show diff button only on version tabs
+      const mbtn = document.getElementById('btn-diff-mobile');
+      if (mbtn) mbtn.style.display = isOfficial ? 'none' : '';
+    }
+
+    // Find the heading currently visible near the top of the mobile scroll area
+    function getMobileCurrentHeading() {
+      const container = document.getElementById('edit-zone-mobile');
+      const rendered  = document.getElementById('mobile-rendered');
+      const headings  = [...rendered.querySelectorAll('h1, h2, h3, h4')];
+      if (!headings.length) return null;
+      const scrollTop = container.scrollTop;
+      let result = headings[0].textContent.trim();
+      for (const h of headings) {
+        if (h.offsetTop <= scrollTop + 80) result = h.textContent.trim();
+        else break;
+      }
+      return result;
+    }
+
+    // Scroll the mobile container to a heading that matches the given text
+    function scrollMobileToHeading(text) {
+      if (!text) return;
+      const container = document.getElementById('edit-zone-mobile');
+      const rendered  = document.getElementById('mobile-rendered');
+      const target = [...rendered.querySelectorAll('h1, h2, h3, h4')]
+        .find(h => h.textContent.trim() === text);
+      if (target) container.scrollTop = target.offsetTop;
     }
 
     function switchMobileTab(tab) {
       // Save current mobile edit if active
       const zone = document.getElementById('edit-zone-mobile');
       if (zone.classList.contains('editing')) saveMobileEditZone();
+      const headingText = getMobileCurrentHeading(); // remember position
       mobileActiveTab = tab;
       const pd = getPage(currentPageId);
       renderMobileView(pd);
+      scrollMobileToHeading(headingText);            // restore position
     }
 
     function updateMobileFooter(pd) {
