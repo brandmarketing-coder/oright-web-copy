@@ -145,8 +145,8 @@
       <span id="mobile-page-name" style="font-size:14px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc;">請選擇頁面</span>
       <span id="sync-status-mobile" style="font-size:10px; color:#475569; flex-shrink:0;"></span>
       <div id="mobile-status-badge"></div>
-      <button id="btn-save-mobile" title="立即儲存" style="padding:4px 11px; font-size:12px; border:none; border-radius:7px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; flex-shrink:0;">儲存</button>
       <button id="btn-help-mobile" title="使用說明" style="width:28px; height:28px; border:1px solid #334155; border-radius:7px; background:transparent; color:#94a3b8; cursor:pointer; font-size:12px; font-weight:600; flex-shrink:0;">i</button>
+      <button id="btn-save-mobile" title="立即儲存" style="padding:4px 11px; font-size:12px; border:none; border-radius:7px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; flex-shrink:0;">儲存</button>
     </div>
 
     <header id="desktop-header" style="background:#fff; border-bottom:1px solid #e2e8f0; padding:0 22px; height:50px; display:flex; align-items:center; gap:10px; flex-shrink:0;">
@@ -155,10 +155,10 @@
       <div style="flex:1;"></div>
       <span id="sync-status" style="font-size:11px; color:#94a3b8;"></span>
       <div id="status-indicator" style="display:none;"></div>
-      <button id="btn-save" title="立即儲存" style="padding:5px 14px; font-size:12.5px; border:none; border-radius:8px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; transition:background .12s; flex-shrink:0;"
-        onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">儲存</button>
       <button id="btn-help" title="使用說明" style="width:30px; height:30px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; color:#64748b; cursor:pointer; font-size:13px; font-weight:600; flex-shrink:0; transition:all .12s;"
         onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">i</button>
+      <button id="btn-save" title="立即儲存" style="padding:5px 14px; font-size:12.5px; border:none; border-radius:8px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; transition:background .12s; flex-shrink:0;"
+        onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">儲存</button>
     </header>
 
     <div style="flex:1; overflow:hidden; padding:14px; display:flex; gap:10px;" id="content-wrap">
@@ -1196,9 +1196,49 @@
     })();
 
     // ── Save button ────────────────────────────────────────────────────────────
-    function triggerManualSave() {
+    async function triggerManualSave() {
       saveActiveEdit();
-      save();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+
+      // Show saving state
+      ['btn-save', 'btn-save-mobile'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.textContent = '儲存中…';
+        btn.style.background = '#f59e0b';
+        btn.disabled = true;
+      });
+
+      let ok = true;
+      if (SYNC_ON) {
+        clearTimeout(_saveTimer);
+        try {
+          const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+            body: JSON.stringify(storage)
+          });
+          ok = r.ok;
+          showSyncStatus(r.ok ? 'synced' : 'error');
+        } catch {
+          ok = false;
+          showSyncStatus('error');
+        }
+      }
+
+      ['btn-save', 'btn-save-mobile'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.disabled = false;
+        if (ok) {
+          btn.textContent = '已儲存 ✓';
+          btn.style.background = '#059669';
+        } else {
+          btn.textContent = '儲存失敗 ✗';
+          btn.style.background = '#ef4444';
+        }
+        setTimeout(() => { btn.textContent = '儲存'; btn.style.background = '#2563eb'; }, 2000);
+      });
     }
     document.getElementById('btn-save').addEventListener('click', triggerManualSave);
     document.getElementById('btn-save-mobile').addEventListener('click', triggerManualSave);
