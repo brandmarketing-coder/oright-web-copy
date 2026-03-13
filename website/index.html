@@ -678,25 +678,24 @@
       });
     }
 
+    const DIFF_LEAF = 'td, th, p, li, h1, h2, h3, h4, h5, h6';
+    const normTxt = el => el.textContent.replace(/\s+/g, ' ').trim();
+
     function buildDiffHtml(vHtml, oHtml) {
-      // Parse both into real DOM so we can walk the structure
       const vDoc = new DOMParser().parseFromString(vHtml, 'text/html');
       const oDoc = new DOMParser().parseFromString(oHtml, 'text/html');
 
-      // Build a set of all text content from official leaf elements
-      const LEAF = 'td, th, p, li, h1, h2, h3, h4, h5, h6';
+      // Normalise whitespace before comparing so minor spacing diffs don't flag
       const oSet = new Set(
-        [...oDoc.querySelectorAll(LEAF)].map(e => e.textContent.trim()).filter(Boolean)
+        [...oDoc.querySelectorAll(DIFF_LEAF)].map(normTxt).filter(Boolean)
       );
 
-      // Highlight version leaf elements whose text doesn't appear in official
-      [...vDoc.querySelectorAll(LEAF)].forEach(el => {
-        const txt = el.textContent.trim();
+      [...vDoc.querySelectorAll(DIFF_LEAF)].forEach(el => {
+        const txt = normTxt(el);
         if (!txt) return;
         if (!oSet.has(txt)) {
-          el.style.background    = '#fef9c3';
-          el.style.outline       = '2px solid #f59e0b';
-          el.style.borderRadius  = '3px';
+          el.style.background   = '#fef9c3';
+          el.style.borderRadius = '3px';
         }
       });
 
@@ -818,6 +817,8 @@
         pd.versions[currentVersionIdx].content = html;
       } else {
         pd.official = html;
+        // Re-render version diff now that official changed
+        if (diffMode) renderVersionContent(pd);
       }
       save();
       exitEditZone(which);
@@ -830,9 +831,28 @@
       if (mdMode.official) saveMdZone('official');
     }
 
-    // Click on rendered → enter edit
-    document.getElementById('version-rendered').addEventListener('click', () => enterEditZone('version'));
-    document.getElementById('official-rendered').addEventListener('click', () => enterEditZone('official'));
+    // Scroll sync helper: find clicked leaf index → scroll matching leaf in other panel
+    function syncScroll(e, sourceRenderedId, targetRenderedId) {
+      const source = document.getElementById(sourceRenderedId);
+      const target = document.getElementById(targetRenderedId);
+      if (!source || !target) return;
+      const leaves = [...source.querySelectorAll(DIFF_LEAF)];
+      const hit    = leaves.find(el => el === e.target || el.contains(e.target));
+      if (!hit) return;
+      const idx = leaves.indexOf(hit);
+      const peer = [...target.querySelectorAll(DIFF_LEAF)][idx];
+      if (peer) peer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Click on rendered → enter edit + scroll sync
+    document.getElementById('version-rendered').addEventListener('click', e => {
+      syncScroll(e, 'version-rendered', 'official-rendered');
+      enterEditZone('version');
+    });
+    document.getElementById('official-rendered').addEventListener('click', e => {
+      syncScroll(e, 'official-rendered', 'version-rendered');
+      enterEditZone('official');
+    });
 
     // Blur → save
     document.getElementById('version-rendered').addEventListener('blur',  () => saveEditZone('version'));
