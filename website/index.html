@@ -404,6 +404,7 @@
 
     function save() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+      showSyncStatus('pending');
     }
 
     function showSyncStatus(s) {
