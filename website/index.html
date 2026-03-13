@@ -662,6 +662,15 @@
           }
           save();
         }
+        // Always re-fetch official.md so the file is the canonical source
+        try {
+          let or = await fetch(`versions/${page.id}/official.md`);
+          if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
+          if (or.ok) {
+            pd.official = marked.parse(await or.text());
+            save();
+          }
+        } catch {}
       }
       currentVersionIdx = pd.activeIdx || 0;
       currentSectionAnchor = null;   // reset on page switch
