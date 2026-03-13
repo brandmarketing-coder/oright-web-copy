@@ -598,7 +598,7 @@
     async function loadCopyPage(page) {
       let pd = getPage(page.id);
       if (!pd) {
-        // Load from versioned files (versions/[id]/v1.md, v2.md, …)
+        // First time: load all version files
         const vCount = page.versionCount || 1;
         const versions = [];
         for (let i = 1; i <= vCount; i++) {
@@ -617,6 +617,18 @@
         pd = { versions, official: versions[0].content, activeIdx: 0, status: 'draft' };
         storage.pages[page.id] = pd;
         save();
+      } else {
+        // Page exists in storage: check if new version files have been added
+        const vCount = page.versionCount || 1;
+        if (pd.versions.length < vCount) {
+          for (let i = pd.versions.length + 1; i <= vCount; i++) {
+            try {
+              const md = await fetchVersionMd(page.id, i);
+              pd.versions.push({ name: `版本${i}`, content: marked.parse(md) });
+            } catch { break; }
+          }
+          save();
+        }
       }
       currentVersionIdx = pd.activeIdx || 0;
       renderTabs(pd);
