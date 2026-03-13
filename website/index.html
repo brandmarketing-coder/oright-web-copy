@@ -378,7 +378,7 @@
     let currentPageId     = null;
     let currentVersionIdx = 0;
     let storage           = {};
-    let diffMode          = false;
+    let diffMode          = true;
     let confirmCb         = null;
     let collapseState     = {};
     let mobileActiveTab   = -1;
@@ -575,7 +575,6 @@
     async function navigate(pageId) {
       // Save any open edit before navigating
       saveActiveEdit();
-      setDiffMode(false);
       currentPageId = pageId;
       currentVersionIdx = 0;
       highlightNav(pageId);
@@ -681,7 +680,7 @@
     }
 
     function buildDiffHtml(vHtml, oHtml) {
-      const toText = h => { const d = document.createElement('div'); d.innerHTML = h; return d.innerText || d.textContent || ''; };
+      const toText = h => new DOMParser().parseFromString(h, 'text/html').body.innerText || '';
       const dmp = new diff_match_patch();
       const diffs = dmp.diff_main(toText(oHtml), toText(vHtml));
       dmp.diff_cleanupSemantic(diffs);
@@ -1331,6 +1330,7 @@
       buildNav();
       buildMobileNav();
       updateAllBadges();
+      setDiffMode(true);
       navigate('01_首頁');
       if (!localStorage.getItem('oright-help-seen')) openHelp();
     })();
