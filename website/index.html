@@ -233,6 +233,9 @@
               style="width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; font-size:10px; font-weight:700; letter-spacing:-.5px;"
               onmouseover="if(!this.dataset.on){this.style.borderColor='#7c3aed';this.style.color='#7c3aed';this.style.background='#f5f3ff';}"
               onmouseout="if(!this.dataset.on){this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';}">≠</button>
+            <button id="btn-export-official" class="md-toggle-btn" title="下載 official.md（可提交至 versions 資料夾）">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
             <button id="btn-toggle-md-official" class="md-toggle-btn" title="切換為 Markdown 模式">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
             </button>
@@ -637,7 +640,14 @@
           catch { content = `> **載入失敗**：請透過 HTTP 伺服器開啟此頁。\n\n（檔案：${page.file}）`; }
           versions.push({ name: '版本1', content: marked.parse(content) });
         }
-        pd = { versions, official: versions[0].content, activeIdx: 0, status: 'draft' };
+        // Try to load official.md from versions folder (overrides v1 default)
+        let officialContent = versions[0].content;
+        try {
+          let or = await fetch(`versions/${page.id}/official.md`);
+          if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
+          if (or.ok) officialContent = marked.parse(await or.text());
+        } catch {}
+        pd = { versions, official: officialContent, activeIdx: 0, status: 'draft' };
         storage.pages[page.id] = pd;
         save();
       } else {
@@ -980,8 +990,23 @@
         save();
         document.getElementById('official-rendered').innerHTML = html;
         exitEditZone('official');
+        downloadOfficialMd();   // auto-export so user can commit to versions/
       });
     });
+
+    // ── Export official.md ─────────────────────────────────────────────────────
+    function downloadOfficialMd() {
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      const md = makeTurndown().turndown(pd.official || '');
+      const blob = new Blob([md], { type: 'text/markdown; charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'official.md';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    document.getElementById('btn-export-official').addEventListener('click', downloadOfficialMd);
 
     // ── Request / cancel review ────────────────────────────────────────────────
     function updateReviewBtn(status) {
@@ -1119,10 +1144,22 @@
       const html = marked.parse(md);
       const pd = getPage(currentPageId);
       if (!pd) return;
-      if (which === 'version') pd.versions[currentVersionIdx].content = html;
-      else pd.official = html;
-      save();
-      document.getElementById(`${which}-rendered`).innerHTML = html;
+      if (which === 'version') {
+        pd.versions[currentVersionIdx].content = html;
+        save();
+        // Re-render with diff if active
+        const el = document.getElementById('version-rendered');
+        el.innerHTML = (diffMode && pd.official) ? buildDiffHtml(html, pd.official) : html;
+      } else {
+        pd.official = html;
+        save();
+        document.getElementById('official-rendered').innerHTML = html;
+        // Also refresh version-side diff
+        if (diffMode) {
+          const vHtml = pd.versions[currentVersionIdx]?.content || '';
+          document.getElementById('version-rendered').innerHTML = buildDiffHtml(vHtml, html);
+        }
+      }
     }
 
     function resetMdView(which) {
