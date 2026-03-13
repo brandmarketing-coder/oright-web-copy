@@ -982,6 +982,7 @@
 
     // ── Set as official ────────────────────────────────────────────────────────
     document.getElementById('btn-set-official').addEventListener('click', () => {
+      saveActiveEdit();
       showConfirm('設為正式版', '確定要將此版本設為正式版？正式版的現有內容將被覆蓋。', () => {
         const pd = getPage(currentPageId);
         if (!pd) return;
@@ -1020,6 +1021,7 @@
     }
 
     document.getElementById('btn-request-review').addEventListener('click', () => {
+      saveActiveEdit();
       const pd = getPage(currentPageId);
       if (!pd) return;
       if (pd.status === 'review') {
@@ -1066,6 +1068,7 @@
     }
 
     document.getElementById('btn-confirm-official').addEventListener('click', () => {
+      saveActiveEdit();
       const pd = getPage(currentPageId);
       if (!pd) return;
       if (pd.status === 'confirmed') {
