@@ -585,6 +585,7 @@
       currentPageId = pageId;
       currentVersionIdx = 0;
       highlightNav(pageId);
+      highlightMobileNav(pageId);
       const page = PAGES.find(p => p.id === pageId);
       document.getElementById('page-title').textContent = page.name;
       document.getElementById('page-route').textContent = page.route || '';
@@ -853,6 +854,8 @@
       if (document.getElementById('edit-zone-official').classList.contains('editing')) saveEditZone('official');
       if (mdMode.version)  saveMdZone('version');
       if (mdMode.official) saveMdZone('official');
+      const mobileZone = document.getElementById('edit-zone-mobile');
+      if (mobileZone && mobileZone.classList.contains('editing')) saveMobileEditZone();
     }
 
     // Scroll sync helper: find clicked leaf index → scroll matching leaf in other panel
@@ -880,6 +883,7 @@
 
     // Input → mark dirty; official input also live-updates diff in version panel
     document.getElementById('version-rendered').addEventListener('input', () => { editDirty.version = true; });
+    let diffDebounceTimer = null;
     document.getElementById('official-rendered').addEventListener('input', () => {
       editDirty.official = true;
       if (diffMode) {
@@ -887,7 +891,10 @@
         if (!pd) return;
         const liveOfficial = document.getElementById('official-rendered').innerHTML;
         const vHtml = pd.versions[currentVersionIdx]?.content || '';
-        document.getElementById('version-rendered').innerHTML = buildDiffHtml(vHtml, liveOfficial);
+        clearTimeout(diffDebounceTimer);
+        diffDebounceTimer = setTimeout(() => {
+          document.getElementById('version-rendered').innerHTML = buildDiffHtml(vHtml, liveOfficial);
+        }, 200);
       }
     });
 
@@ -1272,7 +1279,11 @@
     // Mobile inline editing
     function saveMobileEditZone() {
       const rendered = document.getElementById('mobile-rendered');
-      const html = rendered.innerHTML;
+      const html = (() => {
+        const doc = new DOMParser().parseFromString(rendered.innerHTML, 'text/html');
+        doc.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
+        return doc.body.innerHTML;
+      })();
       const pd = getPage(currentPageId);
       if (!pd) return;
       if (mobileActiveTab === -1) pd.official = html;
@@ -1391,7 +1402,6 @@
     // ── Save button ────────────────────────────────────────────────────────────
     async function triggerManualSave() {
       saveActiveEdit();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
 
       // Show saving state
       ['btn-save', 'btn-save-mobile'].forEach(id => {
@@ -1447,6 +1457,16 @@
     document.getElementById('btn-help-mobile').addEventListener('click', openHelp);
     document.getElementById('btn-help-close').addEventListener('click', closeHelp);
     document.getElementById('help-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeHelp(); });
+
+    // Escape key closes confirm dialog and help modal
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      if (document.getElementById('confirm-overlay').style.display === 'flex') {
+        document.getElementById('confirm-overlay').style.display = 'none';
+        confirmCb = null;
+      }
+      if (document.getElementById('help-overlay').style.display === 'flex') closeHelp();
+    });
 
     // ── Init ───────────────────────────────────────────────────────────────────
     (async () => {
