@@ -6,7 +6,6 @@
   <title>O'right 官網重塑文案對照工具</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/diff-match-patch/1.0.5/diff_match_patch.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/turndown/dist/turndown.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/turndown-plugin-gfm/dist/turndown-plugin-gfm.js"></script>
@@ -681,15 +680,34 @@
 
     function buildDiffHtml(vHtml, oHtml) {
       const toText = h => new DOMParser().parseFromString(h, 'text/html').body.innerText || '';
-      const dmp = new diff_match_patch();
-      const diffs = dmp.diff_main(toText(oHtml), toText(vHtml));
-      dmp.diff_cleanupSemantic(diffs);
+      const vText = toText(vHtml), oText = toText(oHtml);
+
+      // Tokenise: split on whitespace boundaries, keeping delimiters
+      const tok = t => t.match(/\S+|\n+| +/g) || [];
+      const vW = tok(vText), oW = tok(oText);
+      const m = oW.length, n = vW.length;
+
+      // LCS via DP (O(m·n)) — fine for typical page-copy sizes
+      const dp = Array.from({length: m + 1}, () => new Uint16Array(n + 1));
+      for (let i = m - 1; i >= 0; i--)
+        for (let j = n - 1; j >= 0; j--)
+          dp[i][j] = oW[i] === vW[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
+
+      const diffs = []; // [op, token]  op: 0=equal 1=add -1=del
+      let i = 0, j = 0;
+      while (i < m || j < n) {
+        if (i < m && j < n && oW[i] === vW[j]) { diffs.push([0, vW[j]]); i++; j++; }
+        else if (j < n && (i >= m || dp[i][j+1] >= dp[i+1][j])) { diffs.push([1, vW[j]]); j++; }
+        else { diffs.push([-1, oW[i]]); i++; }
+      }
+
+      const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       let html = '<div style="font-size:13.5px;line-height:1.75;white-space:pre-wrap;color:#374151;">';
-      for (const [op, text] of diffs) {
-        const esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-        if      (op ===  1) html += `<mark style="background:#bbf7d0;color:#166534;border-radius:2px;padding:0 2px;">${esc}</mark>`;
-        else if (op === -1) html += `<span style="background:#fee2e2;text-decoration:line-through;color:#991b1b;border-radius:2px;padding:0 2px;">${esc}</span>`;
-        else                html += esc;
+      for (const [op, t] of diffs) {
+        const e = esc(t);
+        if      (op ===  1) html += `<mark style="background:#bbf7d0;color:#166534;border-radius:2px;padding:0 1px;">${e}</mark>`;
+        else if (op === -1) html += `<span style="background:#fee2e2;text-decoration:line-through;color:#991b1b;border-radius:2px;padding:0 1px;">${e}</span>`;
+        else                html += e;
       }
       return html + '</div>';
     }
