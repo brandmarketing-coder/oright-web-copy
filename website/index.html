@@ -140,6 +140,14 @@
         Demo 網站
       </a>
     </div>
+    <div style="padding:8px 10px; border-bottom:1px solid #1e293b;">
+      <button id="btn-connect-folder" onclick="connectVersionsDir()"
+         style="display:flex; align-items:center; gap:6px; padding:7px 11px; width:100%; border:none; border-radius:8px; background:#1e3a5f; color:#93c5fd; font-size:12.5px; font-weight:500; cursor:pointer; transition:background .15s; text-align:left;"
+         title="點選以授權讀寫 versions 資料夾，之後儲存正式版將自動寫入 official.md">
+        <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+        連結資料夾
+      </button>
+    </div>
 
     <nav style="flex:1; padding:6px 8px;" id="nav-list"></nav>
   </aside>
@@ -396,6 +404,108 @@
     let editDirty         = { version: false, official: false };
     let currentSectionAnchor = null;   // topmost visible H2 text when switching versions
     let sectionTrackerBound  = false;
+    let versionsDirHandle    = null;   // File System Access API handle for versions/ folder
+
+    // ── Toast notification ─────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const d = document.createElement('div');
+      d.style.cssText = `position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:${type==='error'?'#ef4444':'#16a34a'};color:#fff;padding:9px 20px;border-radius:9px;font-size:13px;font-weight:500;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.18);pointer-events:none;white-space:nowrap;`;
+      d.textContent = msg;
+      document.body.appendChild(d);
+      setTimeout(() => d.remove(), 2500);
+    }
+
+    // ── File System Access API ─────────────────────────────────────────────────
+    function openFSDB() {
+      return new Promise((res, rej) => {
+        const req = indexedDB.open('oright-fs', 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore('handles');
+        req.onsuccess = e => res(e.target.result);
+        req.onerror = () => rej(req.error);
+      });
+    }
+    async function loadStoredHandle() {
+      try {
+        const db = await openFSDB();
+        return new Promise(res => {
+          const req = db.transaction('handles','readonly').objectStore('handles').get('versions');
+          req.onsuccess = () => res(req.result || null);
+          req.onerror  = () => res(null);
+        });
+      } catch { return null; }
+    }
+    async function storeHandle(handle) {
+      try {
+        const db = await openFSDB();
+        await new Promise((res, rej) => {
+          const tx = db.transaction('handles','readwrite');
+          tx.objectStore('handles').put(handle, 'versions');
+          tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+        });
+      } catch(e) { console.warn('storeHandle', e); }
+    }
+    async function initFSAccess() {
+      if (!('showDirectoryPicker' in window)) {
+        document.getElementById('btn-connect-folder').style.display = 'none';
+        return;
+      }
+      const handle = await loadStoredHandle();
+      if (!handle) return;
+      const perm = await handle.queryPermission({ mode:'readwrite' });
+      if (perm === 'granted') { versionsDirHandle = handle; updateFolderBtn(true); }
+      // if 'prompt': wait for user gesture; if 'denied': nothing
+    }
+    async function connectVersionsDir() {
+      if (!('showDirectoryPicker' in window)) return;
+      try {
+        const handle = await window.showDirectoryPicker({ mode:'readwrite', startIn:'desktop' });
+        await storeHandle(handle);
+        versionsDirHandle = handle;
+        updateFolderBtn(true);
+        showToast('已連結 versions 資料夾');
+      } catch(e) { if (e.name !== 'AbortError') console.error('connectVersionsDir', e); }
+    }
+    async function ensureFSPermission() {
+      if (!versionsDirHandle) return false;
+      try {
+        let p = await versionsDirHandle.queryPermission({ mode:'readwrite' });
+        if (p === 'prompt') p = await versionsDirHandle.requestPermission({ mode:'readwrite' });
+        return p === 'granted';
+      } catch { return false; }
+    }
+    async function writeOfficialMd() {
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      if (!versionsDirHandle) { downloadOfficialMd(); return; }
+      const ok = await ensureFSPermission();
+      if (!ok) { downloadOfficialMd(); return; }
+      try {
+        const pageDir  = await versionsDirHandle.getDirectoryHandle(currentPageId, { create: false });
+        const fileHdl  = await pageDir.getFileHandle('official.md', { create: true });
+        const writable = await fileHdl.createWritable();
+        await writable.write(makeTurndown().turndown(pd.official || ''));
+        await writable.close();
+        showToast('official.md 已儲存');
+      } catch(e) {
+        console.error('writeOfficialMd', e);
+        downloadOfficialMd();
+      }
+    }
+    function updateFolderBtn(connected) {
+      const btn = document.getElementById('btn-connect-folder');
+      if (!btn) return;
+      if (connected) {
+        btn.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0;display:inline-block;margin-top:1px;"></span> 已連結`;
+        btn.style.background = '#052e16';
+        btn.style.color = '#86efac';
+        btn.title = '已連結 versions 資料夾。點選重新選擇。';
+      } else {
+        btn.innerHTML = `<svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg> 連結資料夾`;
+        btn.style.background = '#1e3a5f';
+        btn.style.color = '#93c5fd';
+        btn.title = '點選以授權讀寫 versions 資料夾，之後儲存正式版將自動寫入 official.md';
+      }
+    }
 
     // ── Storage ───────────────────────────────────────────────────────────────
 
@@ -920,6 +1030,7 @@
       } else {
         pd.official = cleanHtml;
         if (diffMode) renderVersionContent(pd);
+        writeOfficialMd();
       }
       save();
       exitEditZone(which);
@@ -999,7 +1110,7 @@
         save();
         document.getElementById('official-rendered').innerHTML = html;
         exitEditZone('official');
-        downloadOfficialMd();   // auto-export so user can commit to versions/
+        writeOfficialMd();   // write to disk (or download as fallback)
       });
     });
 
@@ -1091,6 +1202,7 @@
         showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」，正式版將鎖定不可編輯。', () => {
           pd.status = 'confirmed';
           save();
+          writeOfficialMd();
           updateNavBadge(currentPageId);
           updateStatusIndicator(pd.status);
           updateConfirmBtn(pd.status);
@@ -1168,6 +1280,7 @@
           const vHtml = pd.versions[currentVersionIdx]?.content || '';
           document.getElementById('version-rendered').innerHTML = buildDiffHtml(vHtml, html);
         }
+        writeOfficialMd();
       }
     }
 
@@ -1614,6 +1727,7 @@
       setDiffMode(true);
       navigate('01_首頁');
       if (!localStorage.getItem('oright-help-seen')) openHelp();
+      initFSAccess();   // restore File System handle if previously granted
     })();
   </script>
 </body>
