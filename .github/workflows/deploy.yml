@@ -19,14 +19,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Prepare deploy folder
+        env:
+          JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
+          JSONBIN_BIN: ${{ secrets.JSONBIN_BIN }}
         run: |
           mkdir -p dist
           cp website/index.html dist/
           cp *.md dist/
-          JSONBIN_KEY='${{ secrets.JSONBIN_KEY }}'
-          JSONBIN_BIN='${{ secrets.JSONBIN_BIN }}'
-          sed -i "s|PLACEHOLDER_JSONBIN_KEY|${JSONBIN_KEY}|g" dist/index.html
-          sed -i "s|PLACEHOLDER_JSONBIN_BIN|${JSONBIN_BIN}|g" dist/index.html
+          python3 -c "import os; f=open('dist/index.html','r'); c=f.read(); f.close(); c=c.replace('PLACEHOLDER_JSONBIN_KEY',os.environ['JSONBIN_KEY']); c=c.replace('PLACEHOLDER_JSONBIN_BIN',os.environ['JSONBIN_BIN']); f=open('dist/index.html','w'); f.write(c); f.close()"
 
       - uses: actions/configure-pages@v5
 
