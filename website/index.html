@@ -44,6 +44,8 @@
     .edit-zone.editing::after { display: none; }
     .edit-zone .rendered { cursor: text; padding: 6px 8px; }
     .edit-zone.editing .rendered { outline: none; }
+    .edit-zone.locked { cursor: default; background: #f8fafc; border-color: #e2e8f0; border-style: solid; }
+    .edit-zone.locked::after { content: '🔒 已確認，主管鎖定'; color: #6b7280; background: #f1f5f9; border-color: #e2e8f0; }
 
     /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -641,11 +643,14 @@
       renderVersionContent(pd);
       renderOfficialContent(pd);
       updateStatusIndicator(pd.status);
+      updateConfirmBtn(pd.status);
+      updateConfirmOfficialLock(pd.status);
       updateReviewBtn(pd.status);
       mobileActiveTab = -1;
       renderMobileView(pd);
       updateMobileStatusBadge(pd.status);
       updateMobileReviewBtn(pd.status);
+      updateMobileConfirmBtn(pd.status);
       showView('copy');
     }
 
@@ -691,11 +696,8 @@
         [...oDoc.querySelectorAll(DIFF_LEAF)].map(normTxt).filter(Boolean)
       );
 
-      // Strip any residual diff styles from stored HTML before re-applying
-      vDoc.querySelectorAll('[style]').forEach(el => {
-        el.style.background = ''; el.style.borderRadius = '';
-        if (!el.getAttribute('style').trim()) el.removeAttribute('style');
-      });
+      // Strip ALL residual inline styles from stored HTML before re-applying diff highlights
+      vDoc.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
 
       [...vDoc.querySelectorAll(DIFF_LEAF)].forEach(el => {
         const txt = normTxt(el);
@@ -796,6 +798,7 @@
       const zone     = document.getElementById(`edit-zone-${which}`);
       const rendered = document.getElementById(`${which}-rendered`);
       if (zone.classList.contains('editing')) return;
+      if (zone.classList.contains('locked')) return;  // official locked after confirmation
       zone.classList.add('editing');
       rendered.contentEditable = 'true';
       editDirty[which] = false;
@@ -822,13 +825,10 @@
       if (!dirty) { exitEditZone(which); return; }
 
       const rendered = document.getElementById(`${which}-rendered`);
-      // Strip any diff highlight styles that may have been pasted in
+      // Strip diff highlight styles that may have been pasted in
       const cleanHtml = (() => {
         const doc = new DOMParser().parseFromString(rendered.innerHTML, 'text/html');
-        doc.querySelectorAll('[style]').forEach(el => {
-          el.style.background = ''; el.style.borderRadius = '';
-          if (!el.getAttribute('style').trim()) el.removeAttribute('style');
-        });
+        doc.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
         return doc.body.innerHTML;
       })();
       const pd = getPage(currentPageId);
@@ -940,15 +940,51 @@
     });
 
     // ── Manager confirm ────────────────────────────────────────────────────────
+    function updateConfirmBtn(status) {
+      const btn = document.getElementById('btn-confirm-official');
+      if (status === 'confirmed') {
+        btn.textContent = '已確認 ✓';
+        btn.style.background = '#6b7280';
+        btn.title = '點擊取消確認';
+      } else {
+        btn.textContent = '主管確認';
+        btn.style.background = '';
+        btn.title = '';
+      }
+    }
+
+    function updateConfirmOfficialLock(status) {
+      const zone = document.getElementById('edit-zone-official');
+      if (status === 'confirmed') {
+        zone.classList.add('locked');
+        exitEditZone('official');
+      } else {
+        zone.classList.remove('locked');
+      }
+    }
+
     document.getElementById('btn-confirm-official').addEventListener('click', () => {
-      showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」。', () => {
-        const pd = getPage(currentPageId);
-        if (!pd) return;
-        pd.status = 'confirmed';
-        save();
-        updateNavBadge(currentPageId);
-        updateStatusIndicator(pd.status);
-      });
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      if (pd.status === 'confirmed') {
+        showConfirm('取消確認', '正式版文案已確認。確定要取消確認嗎？取消後可重新編輯。', () => {
+          pd.status = 'draft';
+          save();
+          updateNavBadge(currentPageId);
+          updateStatusIndicator(pd.status);
+          updateConfirmBtn(pd.status);
+          updateConfirmOfficialLock(pd.status);
+        });
+      } else {
+        showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」，正式版將鎖定不可編輯。', () => {
+          pd.status = 'confirmed';
+          save();
+          updateNavBadge(currentPageId);
+          updateStatusIndicator(pd.status);
+          updateConfirmBtn(pd.status);
+          updateConfirmOfficialLock(pd.status);
+        });
+      }
     });
 
     function updateStatusIndicator(status) {
@@ -1201,6 +1237,17 @@
       else { btn.textContent = '請求審查'; btn.style.color = '#94a3b8'; }
     }
 
+    function updateMobileConfirmBtn(status) {
+      const btn = document.getElementById('btn-mobile-confirm');
+      if (status === 'confirmed') {
+        btn.textContent = '已確認 ✓';
+        btn.style.background = '#6b7280';
+      } else {
+        btn.textContent = '主管確認';
+        btn.style.background = '';
+      }
+    }
+
     function updateMobileStatusBadge(status) {
       const el = document.getElementById('mobile-status-badge');
       el.textContent = ''; el.className = '';
@@ -1246,18 +1293,29 @@
     });
 
     document.getElementById('btn-mobile-confirm').addEventListener('click', () => {
-      showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」。', () => {
-        const pd = getPage(currentPageId);
-        if (!pd) return;
-        pd.status = 'confirmed';
-        save();
-        updateNavBadge(currentPageId);
-        updateMobileNavBadge(currentPageId);
-        updateStatusIndicator(pd.status);
-        updateMobileStatusBadge(pd.status);
-        updateMobileReviewBtn(pd.status);
-        updateReviewBtn(pd.status);
-      });
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      if (pd.status === 'confirmed') {
+        showConfirm('取消確認', '正式版文案已確認。確定要取消確認嗎？', () => {
+          pd.status = 'draft';
+          save();
+          updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
+          updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
+          updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
+          updateConfirmBtn(pd.status); updateConfirmOfficialLock(pd.status);
+          updateMobileConfirmBtn(pd.status);
+        });
+      } else {
+        showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」。', () => {
+          pd.status = 'confirmed';
+          save();
+          updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
+          updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
+          updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
+          updateConfirmBtn(pd.status); updateConfirmOfficialLock(pd.status);
+          updateMobileConfirmBtn(pd.status);
+        });
+      }
     });
 
     document.getElementById('btn-mobile-request-review').addEventListener('click', () => {
