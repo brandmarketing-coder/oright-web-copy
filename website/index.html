@@ -145,6 +145,8 @@
       <span id="mobile-page-name" style="font-size:14px; font-weight:600; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc;">請選擇頁面</span>
       <span id="sync-status-mobile" style="font-size:10px; color:#475569; flex-shrink:0;"></span>
       <div id="mobile-status-badge"></div>
+      <button id="btn-save-mobile" title="立即儲存" style="padding:4px 11px; font-size:12px; border:none; border-radius:7px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; flex-shrink:0;">儲存</button>
+      <button id="btn-help-mobile" title="使用說明" style="width:28px; height:28px; border:1px solid #334155; border-radius:7px; background:transparent; color:#94a3b8; cursor:pointer; font-size:12px; font-weight:600; flex-shrink:0;">i</button>
     </div>
 
     <header id="desktop-header" style="background:#fff; border-bottom:1px solid #e2e8f0; padding:0 22px; height:50px; display:flex; align-items:center; gap:10px; flex-shrink:0;">
@@ -153,6 +155,10 @@
       <div style="flex:1;"></div>
       <span id="sync-status" style="font-size:11px; color:#94a3b8;"></span>
       <div id="status-indicator" style="display:none;"></div>
+      <button id="btn-save" title="立即儲存" style="padding:5px 14px; font-size:12.5px; border:none; border-radius:8px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; transition:background .12s; flex-shrink:0;"
+        onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">儲存</button>
+      <button id="btn-help" title="使用說明" style="width:30px; height:30px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; color:#64748b; cursor:pointer; font-size:13px; font-weight:600; flex-shrink:0; transition:all .12s;"
+        onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">i</button>
     </header>
 
     <div style="flex:1; overflow:hidden; padding:14px; display:flex; gap:10px;" id="content-wrap">
@@ -260,6 +266,57 @@
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button id="btn-conf-cancel" class="act-btn">取消</button>
         <button id="btn-conf-ok" class="act-btn-primary">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="help-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width:460px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,.25);">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 22px 12px; border-bottom:1px solid #f1f5f9; position:sticky; top:0; background:#fff; border-radius:16px 16px 0 0;">
+        <span style="font-size:15px; font-weight:700; color:#0f172a;">使用說明</span>
+        <button id="btn-help-close" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#64748b; cursor:pointer; border-radius:7px; font-size:16px; display:flex; align-items:center; justify-content:center;">×</button>
+      </div>
+      <div style="padding:18px 22px 22px; font-size:13.5px; color:#374151; line-height:1.7;">
+        <div style="margin-bottom:14px;">
+          <div style="font-weight:700; color:#0f172a; margin-bottom:6px; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb;">📋 頁面導覽</div>
+          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+            <li>左側選單選擇欲查看的頁面</li>
+            <li>手機版點左上角 ☰ 開啟選單</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">✏️ 編輯文案</div>
+          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+            <li>點擊任意文字區塊即可直接編輯</li>
+            <li>左側為<strong>版本區</strong>，可新增多個版本比較</li>
+            <li>右側為<strong>正式版</strong>，主管確認後的最終文案</li>
+            <li>點「設為正式版」將目前版本複製到正式版</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">💾 儲存與同步</div>
+          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+            <li>編輯後自動儲存，右上角顯示同步狀態</li>
+            <li>點右上角<strong>「儲存」按鈕</strong>可立即強制同步</li>
+            <li>不同裝置會自動載入最新雲端資料</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">🔄 審查流程</div>
+          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+            <li>「請求審查」→ 狀態改為<span style="background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:5px; font-size:11.5px; font-weight:600; margin:0 3px;">待審查</span></li>
+            <li>「主管確認」→ 狀態改為<span style="background:#d1fae5; color:#065f46; padding:1px 6px; border-radius:5px; font-size:11.5px; font-weight:600; margin:0 3px;">已確認</span></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">❓ 其他</div>
+          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+            <li>點右上角 <strong>i</strong> 隨時重新查看此說明</li>
+            <li>「↺ 重設版本一」可恢復原始 .md 內容</li>
+            <li>拖拉中間分隔線可調整左右面板寬度</li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -1138,13 +1195,35 @@
       });
     })();
 
+    // ── Save button ────────────────────────────────────────────────────────────
+    function triggerManualSave() {
+      saveActiveEdit();
+      save();
+    }
+    document.getElementById('btn-save').addEventListener('click', triggerManualSave);
+    document.getElementById('btn-save-mobile').addEventListener('click', triggerManualSave);
+
+    // ── Help modal ─────────────────────────────────────────────────────────────
+    function openHelp() {
+      document.getElementById('help-overlay').style.display = 'flex';
+    }
+    function closeHelp() {
+      document.getElementById('help-overlay').style.display = 'none';
+      localStorage.setItem('oright-help-seen', '1');
+    }
+    document.getElementById('btn-help').addEventListener('click', openHelp);
+    document.getElementById('btn-help-mobile').addEventListener('click', openHelp);
+    document.getElementById('btn-help-close').addEventListener('click', closeHelp);
+    document.getElementById('help-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeHelp(); });
+
     // ── Init ───────────────────────────────────────────────────────────────────
     (async () => {
       await loadStorage();
       buildNav();
       buildMobileNav();
       updateAllBadges();
-      navigate('sitemap');
+      navigate('01_首頁');
+      if (!localStorage.getItem('oright-help-seen')) openHelp();
     })();
   </script>
 </body>
