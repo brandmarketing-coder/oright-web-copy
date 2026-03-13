@@ -347,6 +347,7 @@
     const JSONBIN_KEY = 'PLACEHOLDER_JSONBIN_KEY';
     const JSONBIN_BIN = 'PLACEHOLDER_JSONBIN_BIN';
     const SYNC_ON = JSONBIN_KEY !== 'PLACEHOLDER_JSONBIN_KEY' && JSONBIN_BIN !== 'PLACEHOLDER_JSONBIN_BIN';
+    console.log('[Sync]', { SYNC_ON, KEY_PREFIX: JSONBIN_KEY.slice(0,8), BIN: JSONBIN_BIN });
 
     const PAGES = [
       { id: 'sitemap',        name: 'Site Map',      file: '00_Site_Map.md',        isSiteMap: true },
