@@ -391,6 +391,8 @@
     let collapseState     = {};
     let mobileActiveTab   = -1;
     let editDirty         = { version: false, official: false };
+    let currentSectionAnchor = null;   // topmost visible H2 text when switching versions
+    let sectionTrackerBound  = false;
 
     // ── Storage ───────────────────────────────────────────────────────────────
 
@@ -652,6 +654,7 @@
         }
       }
       currentVersionIdx = pd.activeIdx || 0;
+      currentSectionAnchor = null;   // reset on page switch
       renderTabs(pd);
       renderVersionContent(pd);
       renderOfficialContent(pd);
@@ -747,6 +750,37 @@
       }
     }
 
+    // ── Section anchor tracking ────────────────────────────────────────────────
+    function setupSectionTracker() {
+      if (sectionTrackerBound) return;
+      sectionTrackerBound = true;
+      const scrollEl = document.getElementById('edit-zone-version');
+      scrollEl.addEventListener('scroll', () => {
+        const rendered  = document.getElementById('version-rendered');
+        const headings  = rendered.querySelectorAll('h2');
+        const threshold = scrollEl.getBoundingClientRect().top + 40;
+        let found = null;
+        for (const h of headings) {
+          if (h.getBoundingClientRect().top <= threshold) found = h.textContent.trim();
+          else break;
+        }
+        if (found) currentSectionAnchor = found;
+      }, { passive: true });
+    }
+
+    function scrollToAnchor(sectionText) {
+      if (!sectionText) return;
+      const scrollEl  = document.getElementById('edit-zone-version');
+      const rendered  = document.getElementById('version-rendered');
+      const headings  = rendered.querySelectorAll('h2');
+      for (const h of headings) {
+        if (h.textContent.trim() === sectionText) {
+          scrollEl.scrollTop = h.offsetTop - 12;
+          return;
+        }
+      }
+    }
+
     function renderVersionContent(pd) {
       resetMdView('version');
       const vHtml = pd.versions[currentVersionIdx]?.content || '';
@@ -757,6 +791,7 @@
         el.innerHTML = vHtml;
       }
       exitEditZone('version');
+      setupSectionTracker();
     }
 
     function renderOfficialContent(pd) {
@@ -766,12 +801,14 @@
     }
 
     function switchVersion(idx) {
+      const anchor = currentSectionAnchor;   // capture before re-render
       currentVersionIdx = idx;
       const pd = getPage(currentPageId);
       pd.activeIdx = idx;
-      saveQuiet();   // only activeIdx changed, no content edit
+      saveQuiet();
       renderTabs(pd);
       renderVersionContent(pd);
+      if (anchor) requestAnimationFrame(() => scrollToAnchor(anchor));
     }
 
     function deleteVersion(idx) {
