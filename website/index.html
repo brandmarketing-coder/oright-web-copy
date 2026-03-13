@@ -757,7 +757,7 @@
       const scrollEl = document.getElementById('edit-zone-version');
       scrollEl.addEventListener('scroll', () => {
         const rendered  = document.getElementById('version-rendered');
-        const headings  = rendered.querySelectorAll('h2');
+        const headings  = rendered.querySelectorAll('h2, h3');
         const threshold = scrollEl.getBoundingClientRect().top + 40;
         let found = null;
         for (const h of headings) {
