@@ -192,10 +192,6 @@
               onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff'">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
             </button>
-            <button id="btn-diff" title="顯示與正式版的差異"
-              style="width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; font-size:10px; font-weight:700; letter-spacing:-.5px;"
-              onmouseover="if(!this.dataset.on){this.style.borderColor='#7c3aed';this.style.color='#7c3aed';this.style.background='#f5f3ff';}"
-              onmouseout="if(!this.dataset.on){this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';}">≠</button>
             <button id="btn-toggle-md-version" class="md-toggle-btn" title="切換為 Markdown 模式">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
             </button>
@@ -224,6 +220,10 @@
             <span style="font-size:12px; font-weight:600; color:#374151; letter-spacing:.03em;">正式版</span>
             <span style="font-size:10.5px; color:#94a3b8; background:#f1f5f9; border-radius:4px; padding:1px 5px;">Official</span>
             <div style="flex:1;"></div>
+            <button id="btn-diff" title="顯示版本與正式版的差異"
+              style="width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; font-size:10px; font-weight:700; letter-spacing:-.5px;"
+              onmouseover="if(!this.dataset.on){this.style.borderColor='#7c3aed';this.style.color='#7c3aed';this.style.background='#f5f3ff';}"
+              onmouseout="if(!this.dataset.on){this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';}">≠</button>
             <button id="btn-toggle-md-official" class="md-toggle-btn" title="切換為 Markdown 模式">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
             </button>
@@ -810,14 +810,21 @@
 
     function saveEditZone(which) {
       const rendered = document.getElementById(`${which}-rendered`);
-      const html = rendered.innerHTML;
-      const pd   = getPage(currentPageId);
+      // Strip any diff highlight styles that may have been pasted in
+      const cleanHtml = (() => {
+        const doc = new DOMParser().parseFromString(rendered.innerHTML, 'text/html');
+        doc.querySelectorAll('[style]').forEach(el => {
+          el.style.background = ''; el.style.borderRadius = '';
+          if (!el.getAttribute('style').trim()) el.removeAttribute('style');
+        });
+        return doc.body.innerHTML;
+      })();
+      const pd = getPage(currentPageId);
       if (!pd) return;
       if (which === 'version') {
-        pd.versions[currentVersionIdx].content = html;
+        pd.versions[currentVersionIdx].content = cleanHtml;
       } else {
-        pd.official = html;
-        // Re-render version diff now that official changed
+        pd.official = cleanHtml;
         if (diffMode) renderVersionContent(pd);
       }
       save();
@@ -841,7 +848,7 @@
       if (!hit) return;
       const idx = leaves.indexOf(hit);
       const peer = [...target.querySelectorAll(DIFF_LEAF)][idx];
-      if (peer) peer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (peer) peer.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     // Click on rendered → enter edit + scroll sync
