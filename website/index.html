@@ -376,7 +376,6 @@
     let mobileActiveTab   = -1;
 
     // ── Storage ───────────────────────────────────────────────────────────────
-    let _saveTimer = null;
 
     async function loadStorage() {
       // Load from localStorage first (instant)
@@ -405,20 +404,6 @@
 
     function save() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
-      if (!SYNC_ON) return;
-      showSyncStatus('pending');
-      clearTimeout(_saveTimer);
-      _saveTimer = setTimeout(async () => {
-        showSyncStatus('syncing');
-        try {
-          const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
-            body: JSON.stringify(storage)
-          });
-          showSyncStatus(r.ok ? 'synced' : 'error');
-        } catch { showSyncStatus('error'); }
-      }, 1200);
     }
 
     function showSyncStatus(s) {
@@ -1213,7 +1198,6 @@
 
       let ok = true;
       if (SYNC_ON) {
-        clearTimeout(_saveTimer);
         try {
           const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
             method: 'PUT',
