@@ -428,6 +428,12 @@
             showSyncStatus('synced');
           } else { showSyncStatus('offline'); }
         } catch { showSyncStatus('offline'); }
+
+        // After merging cloud state, push local state back so cloud stays current.
+        // This ensures Device B always receives the latest status on next load.
+        if (Object.keys(storage.pages).length > 0) {
+          syncToCloud();
+        }
       }
     }
 
