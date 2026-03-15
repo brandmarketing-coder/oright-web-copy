@@ -656,8 +656,12 @@
 
     async function loadCopyPage(page) {
       let pd = getPage(page.id);
-      if (!pd) {
-        // First time: load all version files
+      // pd may exist with only {status, activeIdx} from cloud metadata merge but no versions —
+      // treat that the same as first-time load.
+      if (!pd || !pd.versions || pd.versions.length === 0) {
+        const existingStatus    = pd?.status    || 'draft';
+        const existingActiveIdx = pd?.activeIdx || 0;
+        // First time (or metadata-only): load all version files
         const vCount = page.versionCount || 1;
         const versions = [];
         for (let i = 1; i <= vCount; i++) {
@@ -680,7 +684,7 @@
           if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
           if (or.ok) officialContent = marked.parse(await or.text());
         } catch {}
-        pd = { versions, official: officialContent, activeIdx: 0, status: 'draft' };
+        pd = { versions, official: officialContent, activeIdx: existingActiveIdx, status: existingStatus };
         storage.pages[page.id] = pd;
         save();
       } else {
