@@ -254,11 +254,37 @@ Footer
 
 ```
 環境教育參訪 /visit
-├── Hero
-├── 參訪介紹（待規劃）
-├── 參訪流程
-└── 預約申請表單
-    └── 送出 → [表單 API]
+├── Hero（數據條：91國 / +23% / 政府認證 / 免費）
+├── 場域亮點（Venue Highlights）
+│   ├── 政府認證環境教育場域
+│   ├── EEWH 鑽石級綠建築
+│   └── 從工廠到體驗，真實的永續現場
+├── 申請資訊（Visit Info）
+│   ├── 開放時間
+│   ├── 人數限制
+│   ├── 預約申請
+│   └── 課程費用
+├── 活動方案輪播（Program Carousel）
+│   ├── 方案一：歐萊德綠色之旅（Green Journey）
+│   ├── 方案二：資源循環綠色實踐（Circular Economy）
+│   └── 方案三：邁向 ESG 的綠色企業（ESG Leadership）
+├── 預約申請（Contact CTA）
+│   ├── 來電：03-411-6789 #1999
+│   ├── E-mail：OrightVisit@oright.inc
+│   └── LINE：oright12890464
+├── 預約流程（Booking Process）
+│   ├── 01 預約報名
+│   ├── 02 主動聯繫
+│   ├── 03 歐萊德審核
+│   │   ├── 通過 → 04 完成預約
+│   │   └── 未通過（資料不足 / 資格限制）
+│   ├── 04 完成預約
+│   └── 05 活動當天
+├── 交通路線（Transportation）
+│   └── 查看 Google 地圖 → [外連]
+└── CTA 結尾區
+    ├── 立即預約 → #contact-cta
+    └── 查看已參訪國家 → /visited-countries
 ```
 
 ### 3-3 人才招募 `[外連]`
