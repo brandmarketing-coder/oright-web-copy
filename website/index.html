@@ -416,7 +416,13 @@
           if (r.ok) {
             const data = await r.json();
             if (data && data.pages) {
-              storage = data;
+              // Merge only metadata (status, activeIdx) from cloud into local storage.
+              // HTML content stays in localStorage — cloud only carries workflow state.
+              for (const [id, cloudPd] of Object.entries(data.pages)) {
+                if (!storage.pages[id]) storage.pages[id] = {};
+                if (cloudPd.status    !== undefined) storage.pages[id].status    = cloudPd.status;
+                if (cloudPd.activeIdx !== undefined) storage.pages[id].activeIdx = cloudPd.activeIdx;
+              }
               localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
             }
             showSyncStatus('synced');
@@ -435,6 +441,16 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
     }
 
+    // Slim snapshot for JSONBin: only status + activeIdx, no HTML content
+    // Keeps payload well under the 100KB free-tier limit
+    function storageForSync() {
+      const slim = { pages: {} };
+      for (const [id, pd] of Object.entries(storage.pages || {})) {
+        slim.pages[id] = { status: pd.status, activeIdx: pd.activeIdx };
+      }
+      return slim;
+    }
+
     // Upload current storage to JSONBin immediately
     async function syncToCloud() {
       if (!SYNC_ON) return;
@@ -443,7 +459,7 @@
         const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
-          body: JSON.stringify(storage)
+          body: JSON.stringify(storageForSync())
         });
         showSyncStatus(r.ok ? 'synced' : 'error');
       } catch {
@@ -1575,7 +1591,7 @@
           const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
-            body: JSON.stringify(storage)
+            body: JSON.stringify(storageForSync())
           });
           ok = r.ok;
           showSyncStatus(r.ok ? 'synced' : 'error');
