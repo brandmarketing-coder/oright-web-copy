@@ -414,26 +414,19 @@
             headers: { 'X-Master-Key': JSONBIN_KEY, 'X-Bin-Meta': 'false' }
           });
           if (r.ok) {
-            const data = await r.json();
+            const raw = await r.json();
+            // Support compressed format {z: '...'} and legacy uncompressed {pages: {...}}
+            let data = raw;
+            if (raw && raw.z) {
+              try { data = JSON.parse(await decompress(raw.z)); } catch { data = null; }
+            }
             if (data && data.pages) {
-              // Merge only metadata (status, activeIdx) from cloud into local storage.
-              // HTML content stays in localStorage — cloud only carries workflow state.
-              for (const [id, cloudPd] of Object.entries(data.pages)) {
-                if (!storage.pages[id]) storage.pages[id] = {};
-                if (cloudPd.status    !== undefined) storage.pages[id].status    = cloudPd.status;
-                if (cloudPd.activeIdx !== undefined) storage.pages[id].activeIdx = cloudPd.activeIdx;
-              }
+              storage = data;
               localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
             }
             showSyncStatus('synced');
           } else { showSyncStatus('offline'); }
         } catch { showSyncStatus('offline'); }
-
-        // After merging cloud state, push local state back so cloud stays current.
-        // This ensures Device B always receives the latest status on next load.
-        if (Object.keys(storage.pages).length > 0) {
-          syncToCloud();
-        }
       }
     }
 
@@ -447,25 +440,48 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
     }
 
-    // Slim snapshot for JSONBin: only status + activeIdx, no HTML content
-    // Keeps payload well under the 100KB free-tier limit
-    function storageForSync() {
-      const slim = { pages: {} };
-      for (const [id, pd] of Object.entries(storage.pages || {})) {
-        slim.pages[id] = { status: pd.status, activeIdx: pd.activeIdx };
-      }
-      return slim;
+    // ── Compression helpers (deflate-raw via CompressionStream) ──────────────
+    async function compress(str) {
+      const cs = new CompressionStream('deflate-raw');
+      const writer = cs.writable.getWriter();
+      writer.write(new TextEncoder().encode(str));
+      writer.close();
+      const chunks = [];
+      const reader = cs.readable.getReader();
+      while (true) { const {done, value} = await reader.read(); if (done) break; chunks.push(value); }
+      const total = new Uint8Array(chunks.reduce((a, c) => a + c.length, 0));
+      let off = 0; for (const c of chunks) { total.set(c, off); off += c.length; }
+      // btoa in chunks to avoid call-stack overflow on large strings
+      let bin = ''; for (let i = 0; i < total.length; i++) bin += String.fromCharCode(total[i]);
+      return btoa(bin);
     }
 
-    // Upload current storage to JSONBin immediately
+    async function decompress(b64) {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const ds = new DecompressionStream('deflate-raw');
+      const writer = ds.writable.getWriter();
+      writer.write(bytes);
+      writer.close();
+      const chunks = [];
+      const reader = ds.readable.getReader();
+      while (true) { const {done, value} = await reader.read(); if (done) break; chunks.push(value); }
+      const total = new Uint8Array(chunks.reduce((a, c) => a + c.length, 0));
+      let off = 0; for (const c of chunks) { total.set(c, off); off += c.length; }
+      return new TextDecoder().decode(total);
+    }
+
+    // Upload current storage to JSONBin (full data, deflate-compressed)
     async function syncToCloud() {
       if (!SYNC_ON) return;
       showSyncStatus('syncing');
       try {
+        const compressed = await compress(JSON.stringify(storage));
         const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
-          body: JSON.stringify(storageForSync())
+          body: JSON.stringify({ z: compressed })
         });
         showSyncStatus(r.ok ? 'synced' : 'error');
       } catch {
@@ -1598,10 +1614,11 @@
       let ok = true;
       if (SYNC_ON) {
         try {
+          const compressed = await compress(JSON.stringify(storage));
           const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
-            body: JSON.stringify(storageForSync())
+            body: JSON.stringify({ z: compressed })
           });
           ok = r.ok;
           showSyncStatus(r.ok ? 'synced' : 'error');
