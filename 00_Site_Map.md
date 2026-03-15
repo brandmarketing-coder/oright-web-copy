@@ -109,6 +109,7 @@ Footer
 ├── 氣候數據（Climate Emergency）
 ├── GDP → GEP（Paradigm Shift）
 ├── 可驗證行動（Verified Actions）
+├── ±R 計畫（Zero-Carbon Living）
 ├── 創辦人
 │   └── 連結：閱讀創辦人專欄 → /news?category=founder
 ├── 品牌時間軸（Our Journey）
