@@ -663,6 +663,12 @@
       } else {
         await loadCopyPage(page);
       }
+
+      // Scroll all content panes to top on page switch
+      ['edit-zone-version', 'edit-zone-official', 'edit-zone-mobile', 'sitemap-content'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.scrollTop = 0;
+      });
     }
 
     async function loadSiteMap(page) {
