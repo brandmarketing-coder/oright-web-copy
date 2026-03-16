@@ -49,7 +49,7 @@
       background: #eff6ff; padding: 2px 8px; border-radius: 4px;
       border: 1px solid #bfdbfe; font-weight: 500;
     }
-    .edit-zone.editing { border-color: #2563eb; background: #fff; }
+    .edit-zone.editing { border-color: #2563eb; background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.10); }
     .edit-zone.editing::after { display: none; }
     .edit-zone .rendered { cursor: text; padding: 6px 8px; }
     .edit-zone.editing .rendered { outline: none; }
@@ -111,6 +111,21 @@
       font-weight: 500; transition: background .12s;
     }
     .act-btn-green:hover { background: #047857; }
+
+    /* Reading width limit */
+    #version-rendered, #official-rendered { max-width: 900px; }
+
+    /* Tab close button: show only on parent hover */
+    .tab-close-btn { opacity: 0; transition: opacity .15s; }
+    .tab-wrap:hover .tab-close-btn { opacity: 1; }
+
+    /* Diff change count badge */
+    #btn-diff[data-badge]:not([data-badge=""])::after {
+      content: attr(data-badge);
+      background: #ef4444; color: #fff;
+      border-radius: 9999px; font-size: 10px; font-weight: 700;
+      padding: 1px 5px; margin-left: 3px; vertical-align: middle;
+    }
 
     /* Mobile */
     @media (max-width: 768px) {
@@ -189,7 +204,7 @@
       <div id="view-copy" style="display:none; flex:1; gap:0; min-width:0; overflow:hidden;">
 
         <!-- Versions panel -->
-        <div id="panel-versions" style="flex:2; min-width:200px; display:flex; flex-direction:column; background:#fff; border-radius:12px 0 0 12px; border:1px solid #e2e8f0; border-right:none; overflow:hidden;">
+        <div id="panel-versions" style="flex:1; min-width:200px; display:flex; flex-direction:column; background:#fff; border-radius:12px 0 0 12px; border:1px solid #e2e8f0; border-right:none; overflow:hidden;">
           <!-- Tab bar -->
           <div style="display:flex; align-items:center; border-bottom:1px solid #f1f5f9; padding:5px 10px; background:#f8fafc; flex-shrink:0; gap:3px; overflow-x:auto;">
             <div id="version-tabs" style="display:flex; gap:3px; flex:1; align-items:center;"></div>
@@ -226,7 +241,7 @@
         <div id="drag-handle"></div>
 
         <!-- Official panel -->
-        <div id="panel-official" style="flex:3; min-width:150px; display:flex; flex-direction:column; background:#fff; border-radius:0 12px 12px 0; border:1px solid #e2e8f0; border-left:none; overflow:hidden;">
+        <div id="panel-official" style="flex:1; min-width:150px; display:flex; flex-direction:column; background:#fff; border-radius:0 12px 12px 0; border:1px solid #e2e8f0; border-left:none; overflow:hidden;">
           <div style="border-bottom:1px solid #f1f5f9; padding:8px 14px; background:#f8fafc; flex-shrink:0; display:flex; align-items:center; gap:6px;">
             <span style="font-size:12px; font-weight:600; color:#374151; letter-spacing:.03em;">正式版</span>
             <span style="font-size:10.5px; color:#94a3b8; background:#f1f5f9; border-radius:4px; padding:1px 5px;">Official</span>
@@ -751,10 +766,12 @@
       container.innerHTML = '';
       pd.versions.forEach((v, i) => {
         const wrap = document.createElement('div');
+        wrap.className = 'tab-wrap';
         wrap.style.cssText = 'display:flex; align-items:center;';
         const isActive = i === currentVersionIdx;
         const tab = document.createElement('button');
-        tab.style.cssText = `padding:4px 11px; font-size:12.5px; border-radius:7px; border:none; cursor:pointer; font-weight:${isActive?'600':'400'}; background:${isActive?'#2563eb':'transparent'}; color:${isActive?'#fff':'#64748b'}; transition:all .12s;`;
+        tab.className = 'tab-btn' + (isActive ? ' active' : '');
+        tab.style.cssText = `padding:4px 11px; font-size:12.5px; border-radius:7px; cursor:pointer; font-weight:${isActive?'600':'400'}; background:${isActive?'#2563eb':'transparent'}; color:${isActive?'#fff':'#64748b'}; border:${isActive?'none':'1px solid #e2e8f0'}; transition:all .12s;`;
         tab.textContent = v.name;
         if (!isActive) {
           tab.onmouseover = () => { tab.style.background='#f1f5f9'; tab.style.color='#374151'; };
@@ -765,6 +782,7 @@
         if (i > 0) {
           const del = document.createElement('button');
           del.textContent = '×'; del.title = '刪除此版本';
+          del.className = 'tab-close-btn';
           del.style.cssText = 'width:17px; height:17px; border:none; background:transparent; color:#94a3b8; cursor:pointer; border-radius:4px; font-size:13px; display:flex; align-items:center; justify-content:center; padding:0; transition:all .12s;';
           del.onmouseover = () => { del.style.background='#fee2e2'; del.style.color='#ef4444'; };
           del.onmouseout  = () => { del.style.background='transparent'; del.style.color='#94a3b8'; };
@@ -776,6 +794,14 @@
     }
 
     const DIFF_LEAF = 'td, th, p, li, h1, h2, h3, h4, h5, h6';
+
+    // Override table-layout to auto for 3+ column tables so content-heavy columns get more space
+    function adjustTableLayouts(el) {
+      el.querySelectorAll('table').forEach(t => {
+        const firstRow = t.querySelector('tr');
+        if (firstRow && firstRow.children.length >= 3) t.style.tableLayout = 'auto';
+      });
+    }
 
     // Wrap every <table> in a horizontally-scrollable div for mobile
     function wrapTablesForScroll(html) {
@@ -865,13 +891,20 @@
       } else {
         el.innerHTML = vHtml;
       }
+      adjustTableLayouts(el);
+      // Update diff badge with count of highlighted (changed) cells
+      const badge = el.querySelectorAll('[style*="fef9c3"]').length;
+      const btn = document.getElementById('btn-diff');
+      if (btn) btn.dataset.badge = badge > 0 ? badge : '';
       exitEditZone('version');
       setupSectionTracker();
     }
 
     function renderOfficialContent(pd) {
       resetMdView('official');
-      document.getElementById('official-rendered').innerHTML = pd.official || '';
+      const el = document.getElementById('official-rendered');
+      el.innerHTML = pd.official || '';
+      adjustTableLayouts(el);
       exitEditZone('official');
     }
 
@@ -1033,6 +1066,19 @@
     // Blur → save
     document.getElementById('version-rendered').addEventListener('blur',  () => saveEditZone('version'));
     document.getElementById('official-rendered').addEventListener('blur', () => saveEditZone('official'));
+
+    // Ctrl/Cmd+1~9 → switch version tab
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '9') {
+        const activeEl = document.activeElement;
+        // Don't intercept when typing in contenteditable or textarea
+        if (activeEl && (activeEl.isContentEditable || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) return;
+        e.preventDefault();
+        const idx = parseInt(e.key) - 1;
+        const tabs = document.querySelectorAll('#version-tabs .tab-btn');
+        if (tabs[idx]) tabs[idx].click();
+      }
+    });
 
     // Ctrl/Cmd+S → save but stay in edit
     function handleEditKey(e, which) {
@@ -1222,14 +1268,19 @@
         // Re-render with diff if active
         const el = document.getElementById('version-rendered');
         el.innerHTML = (diffMode && pd.official) ? buildDiffHtml(html, pd.official) : html;
+        adjustTableLayouts(el);
       } else {
         pd.official = html;
         save();
-        document.getElementById('official-rendered').innerHTML = html;
+        const offEl = document.getElementById('official-rendered');
+        offEl.innerHTML = html;
+        adjustTableLayouts(offEl);
         // Also refresh version-side diff
         if (diffMode) {
           const vHtml = pd.versions[currentVersionIdx]?.content || '';
-          document.getElementById('version-rendered').innerHTML = buildDiffHtml(vHtml, html);
+          const vEl = document.getElementById('version-rendered');
+          vEl.innerHTML = buildDiffHtml(vHtml, html);
+          adjustTableLayouts(vEl);
         }
       }
     }
