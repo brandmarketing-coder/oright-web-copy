@@ -115,9 +115,9 @@
     /* Reading width limit */
     #version-rendered, #official-rendered { max-width: 900px; }
 
-    /* Tab close button: show only on parent hover */
-    .tab-close-btn { opacity: 0; transition: opacity .15s; }
-    .tab-wrap:hover .tab-close-btn { opacity: 1; }
+    /* Tab close button: collapse to zero width when hidden so it takes no space */
+    .tab-close-btn { width: 0; overflow: hidden; opacity: 0; transition: width .15s, opacity .15s; }
+    .tab-wrap:hover .tab-close-btn { width: 17px; opacity: 1; }
 
     /* Diff change count badge */
     #btn-diff[data-badge]:not([data-badge=""])::after {
