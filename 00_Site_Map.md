@@ -27,7 +27,7 @@ Navbar
 │   ├── 永續美妝 → /sustainability
 │   ├── 綠色產品 → /products
 │   ├── 認證 → /certification
-│   └── 最新消息 → /news
+│   └── 關鍵新聞 → /news
 ├── Shop Now（下拉）
 │   ├── O'right → [外連] oright.inc/tw/products_green/1
 │   ├── O'right Pro → [外連] pro.oright.inc
@@ -52,13 +52,13 @@ Footer
 │   ├── 永續美妝 → /sustainability
 │   ├── 綠色產品 → /products
 │   ├── 認證 → /certification
-│   └── 最新消息 → /news
+│   └── 關鍵新聞 → /news
 ├── 更多資訊欄
 │   ├── 永續報告書 → /csr
 │   ├── 環境教育參訪 → /visit
 │   ├── 跨界合作 → /cooperation
 │   ├── 百貨體驗館 → /store
-│   └── 商品驗證 → [外連] oright.inc/tw/certification
+│   └── 聯絡我們 → /contact
 ├── 聯絡欄（靜態資訊）
 │   ├── 電話：03-411-6789
 │   ├── 地址：桃園市龍潭區
@@ -93,7 +93,7 @@ Footer
 │   └── CTA：查看全部產品系列 → /products
 ├── 影音故事（Brand Film）
 │   └── 播放鈕 → [彈窗] 影片播放
-├── 最新消息
+├── 關鍵新聞
 │   ├── 新聞卡片 → /news/:id
 │   └── 連結：查看全部 → /news
 └── CTA 結尾區
@@ -174,10 +174,10 @@ Footer
         └── 查看永續數據 → /sustainability
 ```
 
-### 2-6 最新消息 `/news`
+### 2-6 關鍵新聞 `/news`
 
 ```
-最新消息 /news
+關鍵新聞 /news
 ├── Hero
 ├── 分類篩選列
 │   ├── 全部
