@@ -362,10 +362,13 @@
     const STORAGE_KEY = 'oright-copy-v3';  // v3: contenteditable editing, HTML storage
 
     // ── Sync config (injected by GitHub Actions from Secrets) ─────────────────
-    const JSONBIN_KEY = 'PLACEHOLDER_JSONBIN_KEY';
-    const JSONBIN_BIN = 'PLACEHOLDER_JSONBIN_BIN';
-    // Detect injection by length: placeholders are 23 chars, real key=60, real BIN=24
-    const SYNC_ON = JSONBIN_KEY.length > 23 && JSONBIN_BIN.length > 23;
+    // FIREBASE_URL  : Firebase Realtime Database base URL
+    //                 e.g. https://your-project-default-rtdb.firebaseio.com
+    // FIREBASE_TOKEN: Database Secret (Firebase console → Project Settings →
+    //                 Service Accounts → Database secrets → Show)
+    const FIREBASE_URL   = 'PLACEHOLDER_FIREBASE_URL';
+    const FIREBASE_TOKEN = 'PLACEHOLDER_FIREBASE_TOKEN';
+    const SYNC_ON = !FIREBASE_URL.startsWith('PLACEHOLDER') && !FIREBASE_TOKEN.startsWith('PLACEHOLDER');
 
     // versionCount = number of vN.md files in website/versions/[id]/
     // Update this when adding new version files to the folder
@@ -410,9 +413,7 @@
       if (SYNC_ON) {
         showSyncStatus('syncing');
         try {
-          const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_KEY, 'X-Bin-Meta': 'false' }
-          });
+          const r = await fetch(`${FIREBASE_URL}/oright-copy.json?auth=${FIREBASE_TOKEN}`);
           if (r.ok) {
             const raw = await r.json();
             // Support compressed format {z: '...'} and legacy uncompressed {pages: {...}}
@@ -478,9 +479,9 @@
       showSyncStatus('syncing');
       try {
         const compressed = await compress(JSON.stringify(storage));
-        const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
+        const r = await fetch(`${FIREBASE_URL}/oright-copy.json?auth=${FIREBASE_TOKEN}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ z: compressed })
         });
         showSyncStatus(r.ok ? 'synced' : 'error');
@@ -1615,9 +1616,9 @@
       if (SYNC_ON) {
         try {
           const compressed = await compress(JSON.stringify(storage));
-          const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN}`, {
+          const r = await fetch(`${FIREBASE_URL}/oright-copy.json?auth=${FIREBASE_TOKEN}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ z: compressed })
           });
           ok = r.ok;

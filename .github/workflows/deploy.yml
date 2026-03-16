@@ -20,14 +20,14 @@ jobs:
 
       - name: Prepare deploy folder
         env:
-          JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
-          JSONBIN_BIN: ${{ secrets.JSONBIN_BIN }}
+          FIREBASE_URL:   ${{ secrets.FIREBASE_URL }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
           mkdir -p dist
           cp website/index.html dist/
           cp *.md dist/
           cp -r website/versions dist/versions
-          python3 -c "import os; f=open('dist/index.html','r'); c=f.read(); f.close(); c=c.replace('PLACEHOLDER_JSONBIN_KEY',os.environ['JSONBIN_KEY']); c=c.replace('PLACEHOLDER_JSONBIN_BIN',os.environ['JSONBIN_BIN']); f=open('dist/index.html','w'); f.write(c); f.close()"
+          python3 -c "import os; f=open('dist/index.html','r'); c=f.read(); f.close(); c=c.replace('PLACEHOLDER_FIREBASE_URL',os.environ['FIREBASE_URL']); c=c.replace('PLACEHOLDER_FIREBASE_TOKEN',os.environ['FIREBASE_TOKEN']); f=open('dist/index.html','w'); f.write(c); f.close()"
 
       - uses: actions/configure-pages@v5
 
