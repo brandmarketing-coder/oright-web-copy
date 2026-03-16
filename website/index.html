@@ -362,13 +362,11 @@
     const STORAGE_KEY = 'oright-copy-v3';  // v3: contenteditable editing, HTML storage
 
     // ── Sync config (injected by GitHub Actions from Secrets) ─────────────────
-    // FIREBASE_URL  : Firebase Realtime Database base URL
-    //                 e.g. https://your-project-default-rtdb.firebaseio.com
-    // FIREBASE_TOKEN: Database Secret (Firebase console → Project Settings →
-    //                 Service Accounts → Database secrets → Show)
-    const FIREBASE_URL   = 'PLACEHOLDER_FIREBASE_URL';
-    const FIREBASE_TOKEN = 'PLACEHOLDER_FIREBASE_TOKEN';
-    const SYNC_ON = !FIREBASE_URL.startsWith('PLACEHOLDER') && !FIREBASE_TOKEN.startsWith('PLACEHOLDER');
+    // FIREBASE_URL: Firebase Realtime Database base URL (no trailing slash)
+    //   e.g. https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app
+    // Rules must allow public read/write (internal tool — URL is the access control)
+    const FIREBASE_URL = 'PLACEHOLDER_FIREBASE_URL';
+    const SYNC_ON = !FIREBASE_URL.startsWith('PLACEHOLDER');
 
     // versionCount = number of vN.md files in website/versions/[id]/
     // Update this when adding new version files to the folder
@@ -413,7 +411,7 @@
       if (SYNC_ON) {
         showSyncStatus('syncing');
         try {
-          const r = await fetch(`${FIREBASE_URL}/oright-copy.json?auth=${FIREBASE_TOKEN}`);
+          const r = await fetch(`${FIREBASE_URL}/oright-copy.json`);
           if (r.ok) {
             const raw = await r.json();
             // Support compressed format {z: '...'} and legacy uncompressed {pages: {...}}
@@ -479,7 +477,7 @@
       showSyncStatus('syncing');
       try {
         const compressed = await compress(JSON.stringify(storage));
-        const r = await fetch(`${FIREBASE_URL}/oright-copy.json?auth=${FIREBASE_TOKEN}`, {
+        const r = await fetch(`${FIREBASE_URL}/oright-copy.json`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ z: compressed })
@@ -1616,7 +1614,7 @@
       if (SYNC_ON) {
         try {
           const compressed = await compress(JSON.stringify(storage));
-          const r = await fetch(`${FIREBASE_URL}/oright-copy.json?auth=${FIREBASE_TOKEN}`, {
+          const r = await fetch(`${FIREBASE_URL}/oright-copy.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ z: compressed })

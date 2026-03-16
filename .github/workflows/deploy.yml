@@ -20,14 +20,13 @@ jobs:
 
       - name: Prepare deploy folder
         env:
-          FIREBASE_URL:   ${{ secrets.FIREBASE_URL }}
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
         run: |
           mkdir -p dist
           cp website/index.html dist/
           cp *.md dist/
           cp -r website/versions dist/versions
-          python3 -c "import os; f=open('dist/index.html','r'); c=f.read(); f.close(); c=c.replace('PLACEHOLDER_FIREBASE_URL',os.environ['FIREBASE_URL']); c=c.replace('PLACEHOLDER_FIREBASE_TOKEN',os.environ['FIREBASE_TOKEN']); f=open('dist/index.html','w'); f.write(c); f.close()"
+          python3 -c "import os; f=open('dist/index.html','r'); c=f.read(); f.close(); c=c.replace('PLACEHOLDER_FIREBASE_URL',os.environ['FIREBASE_URL']); f=open('dist/index.html','w'); f.write(c); f.close()"
 
       - uses: actions/configure-pages@v5
 
