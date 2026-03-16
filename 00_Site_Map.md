@@ -237,14 +237,19 @@ Footer
 永續報告書 /csr
 ├── Hero
 ├── 雙報告介紹（Dual Reports）
+│   ├── 企業永續報告書（GRI · 年度 · 2013–）
+│   └── 氣候暨自然報告書（TNFD · WEF Pioneer · 2023–）
 ├── TNFD 先行者宣言（TNFD Spotlight）
+│   ├── 創辦人引言（葛望平）
+│   └── 大數字：320 家 WEF TNFD 先行者企業
 ├── 報告下載中心（Report Downloads）
 │   ├── Tab：企業永續報告書（2013–2024）
 │   │   ├── 最新版大卡（2024）→ 下載 PDF [外連 / 檔案]
 │   │   └── 歷年列表（2013–2023）→ 下載 PDF [外連 / 檔案]
-│   └── Tab：氣候暨自然報告書
+│   └── Tab：氣候暨自然報告書（TNFD）
 │       └── 最新版大卡（2023）→ 下載 PDF [外連 / 檔案]
 ├── 揭露框架（Disclosure Frameworks）
+│   └── 框架清單：TNFD / TCFD / SBTi / Race to Zero / GRI / ISO 14068-1
 └── CTA 結尾區
     ├── 下載最新報告書 → [外連 / 檔案]
     └── 查看認證清單 → /certification
