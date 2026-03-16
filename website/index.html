@@ -665,7 +665,7 @@
       }
 
       // Scroll all content panes to top on page switch
-      ['edit-zone-version', 'edit-zone-official', 'edit-zone-mobile', 'sitemap-content'].forEach(id => {
+      ['edit-zone-version', 'edit-zone-official', 'edit-zone-mobile', 'view-sitemap'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.scrollTop = 0;
       });
@@ -727,7 +727,7 @@
           save();
         }
       }
-      currentVersionIdx = pd.activeIdx || 0;
+      currentVersionIdx = 0;
       currentSectionAnchor = null;   // reset on page switch
       renderTabs(pd);
       renderVersionContent(pd);
