@@ -1,6 +1,7 @@
 # 歐萊德官網重塑 — Site Map
 
 > 版本：v1.0
+> [O'right 官網架構圖](https://oright.slickplan.com/bimf9lwa)
 > 日期：2026-03-11
 > 用途：提供資通部門進行網站架構開發參考
 
@@ -93,7 +94,7 @@ Footer
 │   └── CTA：查看全部產品系列 → /products
 ├── 影音故事（Brand Film）
 │   └── 播放鈕 → [彈窗] 影片播放
-├── 關鍵新聞
+├── 最新消息
 │   ├── 新聞卡片 → /news/:id
 │   └── 連結：查看全部 → /news
 └── CTA 結尾區
