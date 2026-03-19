@@ -1086,7 +1086,7 @@
       enterEditZone('version');
     });
     document.getElementById('official-rendered').addEventListener('click', e => {
-      syncScroll(e, 'official-rendered', 'version-rendered');
+      if (currentVersionIdx !== -2) syncScroll(e, 'official-rendered', 'version-rendered');
       enterEditZone('official');
     });
 
@@ -1446,6 +1446,12 @@
       offBtn.addEventListener('click', () => switchMobileTab(-1));
       bar.appendChild(offBtn);
 
+      const origBtn = document.createElement('button');
+      origBtn.className = 'mobile-tab-btn' + (mobileActiveTab === -2 ? ' active' : '');
+      origBtn.textContent = '原版';
+      origBtn.addEventListener('click', () => switchMobileTab(-2));
+      bar.appendChild(origBtn);
+
       pd.versions.forEach((v, i) => {
         const tab = document.createElement('button');
         tab.className = 'mobile-tab-btn' + (mobileActiveTab === i ? ' active' : '');
@@ -1529,7 +1535,7 @@
     function switchMobileTab(tab) {
       const zone = document.getElementById('edit-zone-mobile');
       if (zone.classList.contains('editing')) saveMobileEditZone();
-      const headingText = getMobileCurrentHeading();
+      const headingText = (tab !== -2 && mobileActiveTab !== -2) ? getMobileCurrentHeading() : null;
       mobileActiveTab = tab;
       const pd = getPage(currentPageId);
       renderMobileView(pd);
