@@ -760,20 +760,18 @@
           }
           save();
         }
-        try {
-          let or = await fetch(`versions/${page.id}/official.md`);
-          if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
-          if (or.ok) {
-            pd.official = marked.parse(await or.text());
-            save();
-          }
-        } catch {}
+        if (pd.official == null) {
+          try {
+            let or = await fetch(`versions/${page.id}/official.md`);
+            if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
+            if (or.ok) { pd.official = marked.parse(await or.text()); save(); }
+          } catch {}
+        }
         try {
           let or2 = await fetch(`versions/${page.id}/original.md`);
           if (!or2.ok) or2 = await fetch(`../versions/${page.id}/original.md`);
           if (or2.ok) {
             pd.original = marked.parse(await or2.text());
-            save();
           }
         } catch {}
       }
