@@ -314,7 +314,7 @@
   </div>
 
   <!-- ─── Confirm Dialog ────────────────────────────────────────────────── -->
-  <div id="confirm-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:100; align-items:center; justify-content:center; padding:20px;">
+  <div id="confirm-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:600; align-items:center; justify-content:center; padding:20px;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:340px; padding:22px 24px; box-shadow:0 20px 50px rgba(0,0,0,.2);">
       <div id="confirm-title" style="font-size:15px; font-weight:600; color:#0f172a; margin-bottom:6px;"></div>
       <div id="confirm-body"  style="font-size:13px; color:#6b7280; line-height:1.55; margin-bottom:18px;"></div>
@@ -326,7 +326,7 @@
   </div>
 
   <!-- ─── Suggestion Modal ────────────────────────────────────────────────── -->
-  <div id="suggestion-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; align-items:center; justify-content:center; padding:20px;">
+  <div id="suggestion-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:500; align-items:center; justify-content:center; padding:20px;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:440px; max-height:82vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,.25);">
       <!-- Header -->
       <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px 12px; flex-shrink:0; border-bottom:1px solid #f1f5f9;">
@@ -835,6 +835,24 @@
     function renderTabs(pd) {
       const container = document.getElementById('version-tabs');
       container.innerHTML = '';
+
+      // "原版" tab (always first, index -2)
+      const origWrap = document.createElement('div');
+      origWrap.className = 'tab-wrap';
+      origWrap.style.cssText = 'display:flex; align-items:center;';
+      const isOrigActive = currentVersionIdx === -2;
+      const origTab = document.createElement('button');
+      origTab.className = 'tab-btn' + (isOrigActive ? ' active' : '');
+      origTab.style.cssText = `padding:4px 11px; font-size:12.5px; border-radius:7px; cursor:pointer; font-weight:${isOrigActive?'600':'400'}; background:${isOrigActive?'#2563eb':'transparent'}; color:${isOrigActive?'#fff':'#64748b'}; border:${isOrigActive?'none':'1px solid #e2e8f0'}; transition:all .12s;`;
+      origTab.textContent = '原版';
+      if (!isOrigActive) {
+        origTab.onmouseover = () => { origTab.style.background='#f1f5f9'; origTab.style.color='#374151'; };
+        origTab.onmouseout  = () => { origTab.style.background='transparent'; origTab.style.color='#64748b'; };
+      }
+      origTab.addEventListener('click', () => { saveActiveEdit(); switchVersion(-2); });
+      origWrap.appendChild(origTab);
+      container.appendChild(origWrap);
+
       pd.versions.forEach((v, i) => {
         const wrap = document.createElement('div');
         wrap.className = 'tab-wrap';
@@ -975,8 +993,15 @@
 
     function renderVersionContent(pd) {
       resetMdView('version');
-      const vHtml = pd.versions[currentVersionIdx]?.content || '';
       const el = document.getElementById('version-rendered');
+      if (currentVersionIdx === -2) {
+        el.innerHTML = '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（原版內容尚未填入）</p>';
+        adjustTableLayouts(el);
+        exitEditZone('version');
+        setupSectionTracker();
+        return;
+      }
+      const vHtml = pd.versions[currentVersionIdx]?.content || '';
       if (diffMode && pd.official) {
         el.innerHTML = buildDiffHtml(vHtml, pd.official);
       } else {
@@ -1003,8 +1028,7 @@
       const anchor = currentSectionAnchor;   // capture before re-render
       currentVersionIdx = idx;
       const pd = getPage(currentPageId);
-      pd.activeIdx = idx;
-      saveQuiet();
+      if (idx >= 0) { pd.activeIdx = idx; saveQuiet(); }
       renderTabs(pd);
       renderVersionContent(pd);
       if (anchor) requestAnimationFrame(() => scrollToAnchor(anchor));
@@ -1518,6 +1542,13 @@
       offBtn.addEventListener('click', () => switchMobileTab(-1));
       bar.appendChild(offBtn);
 
+      // "原版" tab
+      const origBtn = document.createElement('button');
+      origBtn.className = 'mobile-tab-btn' + (mobileActiveTab === -2 ? ' active' : '');
+      origBtn.textContent = '原版';
+      origBtn.addEventListener('click', () => switchMobileTab(-2));
+      bar.appendChild(origBtn);
+
       // Version tabs (no × button)
       pd.versions.forEach((v, i) => {
         const tab = document.createElement('button');
@@ -1564,10 +1595,14 @@
 
     function renderMobileContent(pd) {
       const isOfficial = mobileActiveTab === -1;
-      const vHtml = isOfficial ? (pd.official || '') : (pd.versions[mobileActiveTab]?.content || '');
-      const rawHtml = (!isOfficial && diffMode && pd.official)
-        ? buildDiffHtml(vHtml, pd.official)
-        : vHtml;
+      const isOriginal = mobileActiveTab === -2;
+      let rawHtml;
+      if (isOriginal) {
+        rawHtml = '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（原版內容尚未填入）</p>';
+      } else {
+        const vHtml = isOfficial ? (pd.official || '') : (pd.versions[mobileActiveTab]?.content || '');
+        rawHtml = (!isOfficial && diffMode && pd.official) ? buildDiffHtml(vHtml, pd.official) : vHtml;
+      }
       document.getElementById('mobile-rendered').innerHTML = wrapTablesForScroll(rawHtml);
       const zone = document.getElementById('edit-zone-mobile');
       zone.classList.remove('editing');
@@ -1750,7 +1785,7 @@
           <div style="padding:10px 12px;border-top:1px solid #f1f5f9;">
             <div id="sugg-view-${i}" style="font-size:13px;color:#374151;line-height:1.55;white-space:pre-wrap;">${c.text}</div>
             <textarea id="sugg-edit-${i}" style="display:none;width:100%;border:1px solid #2563eb;border-radius:6px;padding:8px;font-size:13px;resize:vertical;outline:none;font-family:inherit;box-sizing:border-box;" rows="3">${c.text}</textarea>
-            ${c.attachment ? `<div style="margin-top:6px;font-size:11.5px;color:#6b7280;">📎 ${c.attachment.name}</div>` : ''}
+            ${c.attachment ? `<div style="margin-top:6px;font-size:11.5px;color:#6b7280;">📎 ${c.attachment.data ? `<a href="${c.attachment.data}" download="${c.attachment.name}" style="color:#2563eb;text-decoration:none;">${c.attachment.name}</a>` : c.attachment.name}</div>` : ''}
             <div style="margin-top:8px;display:flex;gap:6px;">
               <button class="sugg-edit-btn act-btn" style="font-size:11.5px;padding:3px 9px;" data-idx="${i}">編輯</button>
               <button class="sugg-save-btn act-btn-primary" style="display:none;font-size:11.5px;padding:3px 9px;" data-idx="${i}">儲存</button>
@@ -1795,7 +1830,7 @@
         });
       }
       if (!pd.comments) pd.comments = [];
-      pd.comments.push({ text, ts, attachment: attachment ? { name: attachment.name, type: attachment.type } : null });
+      pd.comments.push({ text, ts, attachment: attachment ? { name: attachment.name, type: attachment.type, data: attachment.data } : null });
       save();
       syncToCloud();
       renderSuggComments(pd);
