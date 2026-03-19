@@ -6,7 +6,8 @@
       "Bash(where.exe python3:*)",
       "Bash(where.exe python:*)",
       "Bash(cmd.exe /c \"powershell.exe -ExecutionPolicy Bypass -File \"\"c:\\\\Users\\\\oright\\\\Desktop\\\\官網重塑文案\\\\test.ps1\"\" > \"\"c:\\\\Users\\\\oright\\\\Desktop\\\\out.txt\"\" 2>&1\")",
-      "Read(//c/Users/oright/Desktop/**)"
+      "Read(//c/Users/oright/Desktop/**)",
+      "Bash(powershell -Command \"Get-Command python,python3,node,java,pdftotext 2>&1 | Select-Object Name,Source\")"
     ]
   }
 }

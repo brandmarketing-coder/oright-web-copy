@@ -229,12 +229,6 @@
               onmouseout="if(!this.disabled){this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             </button>
-            <button id="btn-reset-version1" title="重設版本一為原始 .md 內容"
-              style="width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s;"
-              onmouseover="this.style.borderColor='#f97316';this.style.color='#f97316';this.style.background='#fff7ed'"
-              onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff'">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-            </button>
             <button id="btn-toggle-md-version" class="md-toggle-btn" title="切換為 Markdown 模式">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
             </button>
@@ -364,19 +358,29 @@
       </div>
       <div style="padding:18px 22px 22px; font-size:13.5px; color:#374151; line-height:1.7;">
         <div style="margin-bottom:14px;">
-          <div style="font-weight:700; color:#0f172a; margin-bottom:6px; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb;">📋 頁面導覽</div>
+          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">📋 頁面導覽</div>
           <ul style="margin:0; padding-left:18px; color:#4b5563;">
             <li>左側選單選擇欲查看的頁面</li>
             <li>手機版點左上角 ☰ 開啟選單</li>
           </ul>
         </div>
         <div style="margin-bottom:14px;">
+          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">📑 版本管理</div>
+          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+            <li><strong>原版</strong>：第一個 tab，顯示改版前官網原始文案（唯讀）</li>
+            <li><strong>Readdy.AI</strong>：第一個 AI 生成版本</li>
+            <li><strong>AI版_v1 / AI版_v2…</strong>：後續新增版本依序命名</li>
+            <li>點 <strong>＋</strong> 新增版本，點垃圾桶刪除目前版本</li>
+            <li>點擊版本 tab 下方的區塊標題可快速跳至對應段落</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:14px;">
           <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">✏️ 編輯文案</div>
           <ul style="margin:0; padding-left:18px; color:#4b5563;">
             <li>點擊任意文字區塊即可直接編輯</li>
-            <li>左側為<strong>版本區</strong>，可新增多個版本比較</li>
-            <li>右側為<strong>正式版</strong>，主管確認後的最終文案</li>
+            <li>右側<strong>正式版</strong>顯示已渲染格式；左側正式版區塊標示<code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">內容形式</code>供參考</li>
             <li>點「設為正式版」將目前版本複製到正式版</li>
+            <li>右上角 <strong>&lt;/&gt;</strong> 切換為 Markdown 原始碼編輯模式（原版 tab 不支援）</li>
           </ul>
         </div>
         <div style="margin-bottom:14px;">
@@ -392,13 +396,21 @@
           <ul style="margin:0; padding-left:18px; color:#4b5563;">
             <li>「請求審查」→ 狀態改為<span style="background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:5px; font-size:11.5px; font-weight:600; margin:0 3px;">待審查</span></li>
             <li>「主管確認」→ 狀態改為<span style="background:#d1fae5; color:#065f46; padding:1px 6px; border-radius:5px; font-size:11.5px; font-weight:600; margin:0 3px;">已確認</span></li>
+            <li>確認後正式版鎖定，如需修改先點「駁回」</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">💬 建議留言</div>
+          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+            <li>點右下角「＋ 建議」開啟留言視窗，可附上截圖附件</li>
+            <li>附件點擊後可直接下載</li>
+            <li>留言以折疊方式顯示，點標題展開；可編輯或刪除</li>
           </ul>
         </div>
         <div>
           <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">❓ 其他</div>
           <ul style="margin:0; padding-left:18px; color:#4b5563;">
             <li>點右上角 <strong>i</strong> 隨時重新查看此說明</li>
-            <li>「↺ 重設版本一」可恢復原始 .md 內容</li>
             <li>拖拉中間分隔線可調整左右面板寬度</li>
           </ul>
         </div>
@@ -797,7 +809,14 @@
           if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
           if (or.ok) officialContent = marked.parse(await or.text());
         } catch {}
-        pd = { versions, official: officialContent, activeIdx: existingActiveIdx, status: existingStatus };
+        // Try to load original.md
+        let originalContent = null;
+        try {
+          let or2 = await fetch(`versions/${page.id}/original.md`);
+          if (!or2.ok) or2 = await fetch(`../versions/${page.id}/original.md`);
+          if (or2.ok) originalContent = marked.parse(await or2.text());
+        } catch {}
+        pd = { versions, official: officialContent, original: originalContent, activeIdx: existingActiveIdx, status: existingStatus };
         storage.pages[page.id] = pd;
         save();
       } else {
@@ -818,6 +837,15 @@
           if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
           if (or.ok) {
             pd.official = marked.parse(await or.text());
+            save();
+          }
+        } catch {}
+        // Always re-fetch original.md
+        try {
+          let or2 = await fetch(`versions/${page.id}/original.md`);
+          if (!or2.ok) or2 = await fetch(`../versions/${page.id}/original.md`);
+          if (or2.ok) {
+            pd.original = marked.parse(await or2.text());
             save();
           }
         } catch {}
@@ -904,7 +932,7 @@
       // Update delete button state (disabled when only 1 version or on version 1)
       const delBtn = document.getElementById('btn-del-version');
       if (delBtn) {
-        const canDelete = pd.versions.length > 1 && currentVersionIdx > 0;
+        const canDelete = pd.versions.length > 1 && currentVersionIdx >= 0;
         delBtn.disabled = !canDelete;
         delBtn.style.opacity = canDelete ? '1' : '0.35';
         delBtn.style.cursor  = canDelete ? 'pointer' : 'default';
@@ -1003,13 +1031,16 @@
     function renderVersionContent(pd) {
       resetMdView('version');
       const el = document.getElementById('version-rendered');
+      const mdToggleBtn = document.getElementById('btn-toggle-md-version');
       if (currentVersionIdx === -2) {
-        el.innerHTML = '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（原版內容尚未填入）</p>';
+        if (mdToggleBtn) mdToggleBtn.style.display = 'none';
+        el.innerHTML = pd.original || '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（原版內容尚未填入）</p>';
         adjustTableLayouts(el);
         exitEditZone('version');
         setupSectionTracker();
         return;
       }
+      if (mdToggleBtn) mdToggleBtn.style.display = '';
       const vHtml = pd.versions[currentVersionIdx]?.content || '';
       if (diffMode && pd.official) {
         el.innerHTML = buildDiffHtml(vHtml, pd.official);
@@ -1058,31 +1089,13 @@
     // ── Delete current version ──────────────────────────────────────────────────
     document.getElementById('btn-del-version').addEventListener('click', () => {
       const pd = getPage(currentPageId);
-      if (!pd || pd.versions.length <= 1 || currentVersionIdx === 0) return;
+      if (!pd || pd.versions.length <= 1 || currentVersionIdx < 0) return;
       const vName = pd.versions[currentVersionIdx]?.name || `版本${currentVersionIdx + 1}`;
       showConfirm('刪除版本', `確定要刪除「${vName}」？此操作無法復原。`, () => {
         deleteVersion(currentVersionIdx);
       });
     });
 
-    // ── Reset version 1 ────────────────────────────────────────────────────────
-    document.getElementById('btn-reset-version1').addEventListener('click', () => {
-      const pd = getPage(currentPageId);
-      if (!pd) return;
-      const page = PAGES.find(p => p.id === currentPageId);
-      showConfirm('重設版本一', '確定要將版本一恢復為版本檔案（v1.md）內容？此操作無法復原。', async () => {
-        let content = '';
-        try { content = await fetchVersionMd(page.id, 1); }
-        catch { try { content = await fetchMd(page.file); } catch { content = `> 載入失敗`; } }
-        const html = marked.parse(content);
-        pd.versions[0].content = html;
-        save();
-        if (currentVersionIdx === 0) {
-          renderTabs(pd);
-          renderVersionContent(pd);
-        }
-      });
-    });
 
     // ── Inline editing (contenteditable) ───────────────────────────────────────
     function enterEditZone(which) {
@@ -1400,6 +1413,7 @@
       const pd = getPage(currentPageId);
       if (!pd) return;
       if (which === 'version') {
+        if (currentVersionIdx === -2) return;
         pd.versions[currentVersionIdx].content = html;
         save();
         // Re-render with diff if active
@@ -1584,7 +1598,7 @@
       bar.appendChild(addBtn);
 
       // Trash button (only when on a deletable version: index > 0 and multiple versions)
-      const canDelMobile = mobileActiveTab > 0 && pd.versions.length > 1;
+      const canDelMobile = mobileActiveTab >= 0 && pd.versions.length > 1;
       const trashBtn = document.createElement('button');
       trashBtn.title = '刪除目前版本';
       trashBtn.style.cssText = `padding:6px 8px; font-size:13px; border:none; background:transparent; color:${canDelMobile ? '#94a3b8' : '#d1d5db'}; cursor:${canDelMobile ? 'pointer' : 'default'}; display:flex; align-items:center;`;
@@ -1607,7 +1621,7 @@
       const isOriginal = mobileActiveTab === -2;
       let rawHtml;
       if (isOriginal) {
-        rawHtml = '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（原版內容尚未填入）</p>';
+        rawHtml = pd.original || '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（原版內容尚未填入）</p>';
       } else {
         const vHtml = isOfficial ? (pd.official || '') : (pd.versions[mobileActiveTab]?.content || '');
         rawHtml = (!isOfficial && diffMode && pd.official) ? buildDiffHtml(vHtml, pd.official) : vHtml;
