@@ -297,11 +297,14 @@
           </div>
         </div>
         <!-- Footer -->
-        <div style="flex-shrink:0; background:#fff; border:1px solid #e2e8f0; border-top:1px solid #f1f5f9; margin:0 10px; margin-bottom:max(10px, env(safe-area-inset-bottom)); border-radius:0 0 12px 12px; padding:10px 14px; display:flex; align-items:center; gap:8px;">
-          <a id="btn-mobile-request-review" href="#" style="font-size:12px; color:#94a3b8; text-decoration:underline; cursor:pointer;" onclick="return false;">請求審查</a>
-          <div style="flex:1;"></div>
-          <button id="btn-mobile-set-official" class="act-btn-primary" style="display:none; font-size:12px; padding:5px 10px;">設為正式版</button>
-          <button id="btn-mobile-confirm" class="act-btn-green" style="font-size:12px; padding:5px 10px;">主管確認</button>
+        <div style="flex-shrink:0; background:#fff; border:1px solid #e2e8f0; border-top:1px solid #f1f5f9; margin:0 10px; margin-bottom:max(10px, env(safe-area-inset-bottom)); border-radius:0 0 12px 12px; padding:10px 14px; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button id="btn-mobile-add-sugg" style="padding:4px 10px; font-size:12px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer;" onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';">＋ 建議</button>
+            <div style="flex:1;"></div>
+            <button id="btn-mobile-set-official" class="act-btn-primary" style="display:none; font-size:12px; padding:5px 10px;">設為正式版</button>
+            <button id="btn-mobile-confirm" class="act-btn-green" style="font-size:12px; padding:5px 10px;">主管確認</button>
+          </div>
+          <div id="mobile-confirm-timestamp" style="display:none; font-size:11px; color:#6b7280; text-align:right;"></div>
         </div>
       </div>
     </div>
@@ -864,7 +867,7 @@
       renderMobileView(pd);
       updateMobileStatusBadge(pd.status);
       updateMobileReviewBtn(pd.status);
-      updateMobileConfirmBtn(pd.status);
+      updateMobileConfirmBtn(pd.status, pd.confirmedAt);
       showView('copy');
     }
 
@@ -1676,19 +1679,21 @@
     }
 
     function updateMobileReviewBtn(status) {
-      const btn = document.getElementById('btn-mobile-request-review');
-      if (status === 'review') { btn.textContent = '取消審查'; btn.style.color = '#f97316'; }
-      else { btn.textContent = '請求審查'; btn.style.color = '#94a3b8'; }
+      // Review button removed from mobile footer — no-op
     }
 
-    function updateMobileConfirmBtn(status) {
+    function updateMobileConfirmBtn(status, confirmedAt) {
       const btn = document.getElementById('btn-mobile-confirm');
+      const ts  = document.getElementById('mobile-confirm-timestamp');
       if (status === 'confirmed') {
         btn.textContent = '已確認 ✓';
         btn.style.background = '#6b7280';
+        if (ts && confirmedAt) { ts.textContent = `審核時間：${confirmedAt}`; ts.style.display = ''; }
+        else if (ts) { ts.style.display = 'none'; }
       } else {
         btn.textContent = '主管確認';
         btn.style.background = '';
+        if (ts) ts.style.display = 'none';
       }
     }
 
@@ -1756,7 +1761,7 @@
           updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
           updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
           updateConfirmBtn(pd.status); updateConfirmOfficialLock(pd.status);
-          updateMobileConfirmBtn(pd.status);
+          updateMobileConfirmBtn(pd.status, pd.confirmedAt);
         });
       } else {
         showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」。', () => {
@@ -1767,31 +1772,12 @@
           updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
           updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
           updateConfirmBtn(pd.status, pd.confirmedAt); updateConfirmOfficialLock(pd.status);
-          updateMobileConfirmBtn(pd.status);
+          updateMobileConfirmBtn(pd.status, pd.confirmedAt);
         });
       }
     });
 
-    document.getElementById('btn-mobile-request-review').addEventListener('click', () => {
-      saveActiveEdit();
-      const pd = getPage(currentPageId);
-      if (!pd) return;
-      if (pd.status === 'review') {
-        showConfirm('取消審查', '確定要取消審查？狀態將回到「草稿」。', () => {
-          pd.status = 'draft'; save(); syncToCloud();
-          updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
-          updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
-          updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
-        });
-      } else {
-        showConfirm('請求審查', '確定要送出進行審查？', () => {
-          pd.status = 'review'; save(); syncToCloud();
-          updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
-          updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
-          updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
-        });
-      }
-    });
+    document.getElementById('btn-mobile-add-sugg').addEventListener('click', openSuggestionModal);
 
     // ── Suggestion modal ───────────────────────────────────────────────────────
     function renderSuggComments(pd) {
@@ -1913,7 +1899,7 @@
         updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
         updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
         updateConfirmBtn(pd.status); updateConfirmOfficialLock(pd.status);
-        updateMobileConfirmBtn(pd.status);
+        updateMobileConfirmBtn(pd.status, pd.confirmedAt);
         updateReviewBtn(pd.status); updateMobileReviewBtn(pd.status);
       });
     });
