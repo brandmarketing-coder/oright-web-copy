@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -10,7 +10,6 @@
   <script src="https://cdn.jsdelivr.net/npm/turndown/dist/turndown.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/turndown-plugin-gfm/dist/turndown-plugin-gfm.js"></script>
   <style>
-    /* Markdown prose */
     .prose { color: #374151; font-size: 13.5px; }
     .prose h1 { font-size: 1.3rem; font-weight: 700; margin: 1.2rem 0 .4rem; color: #111827; }
     .prose h2 { font-size: 1.1rem; font-weight: 600; margin: 1.2rem 0 .4rem; color: #111827; border-bottom: 1px solid #f3f4f6; padding-bottom: .2rem; }
@@ -32,7 +31,6 @@
     .prose hr { border: none; border-top: 1px solid #f3f4f6; margin: .8rem 0; }
     .prose strong { font-weight: 600; color: #111827; }
 
-    /* Scrollable table wrapper (applied via JS on mobile) */
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: .6rem 0; }
     .table-scroll table { width: max-content; min-width: 100%; margin: 0; }
     @media (max-width: 768px) {
@@ -40,7 +38,6 @@
       .prose th { min-width: 55px; max-width: 160px; white-space: normal; word-break: break-word; }
     }
 
-    /* Editable content area */
     .edit-zone { position: relative; min-height: 48px; border-radius: 6px; border: 1.5px dashed #cbd5e1; background: #fafbfc; }
     .edit-zone::after {
       content: '✎ 點擊以編輯';
@@ -56,18 +53,15 @@
     .edit-zone.locked { cursor: default; background: #f8fafc; border-color: #e2e8f0; border-style: solid; }
     .edit-zone.locked::after { content: '🔒 已確認，主管鎖定'; color: #6b7280; background: #f1f5f9; border-color: #e2e8f0; }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
-    /* Badge */
     .badge-review    { display:inline-block; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:600; background:#fef3c7; color:#92400e; border:1px solid #fcd34d; margin-left:5px; }
     .badge-confirmed { display:inline-block; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:600; background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; margin-left:5px; }
     .badge-rejected  { display:inline-block; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:600; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; margin-left:5px; }
 
-    /* Sitemap tree */
     .sitemap-tree { font-size:12.5px; line-height:1.7; margin-bottom:18px; padding:16px 18px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; }
     .sitemap-tree .st-root { font-weight:700; color:#1e3a5f; font-size:13px; }
     .sitemap-tree .st-row { display:flex; align-items:baseline; gap:4px; padding:1px 0; }
@@ -81,13 +75,11 @@
     .sitemap-tree .st-modal  { background:#fdf4ff; color:#7e22ce; }
     .sitemap-tree .st-dyn    { background:#fff7ed; color:#c2410c; }
 
-    /* Markdown toggle button */
-    .md-toggle-btn { width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+    .md-toggle-btn, .btn-icon { width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
     .md-toggle-btn:hover { border-color:#2563eb; color:#2563eb; background:#eff6ff; }
     .md-toggle-btn.active { border-color:#2563eb; color:#2563eb; background:#dbeafe; }
     .md-toggle-btn.active:hover { background:#bfdbfe; }
 
-    /* Markdown source textarea */
     .md-textarea {
       display: none; flex: 1; border: none; resize: none; outline: none;
       font-family: ui-monospace, 'Cascadia Code', 'JetBrains Mono', monospace;
@@ -96,12 +88,10 @@
     }
     .md-textarea:focus { background: #0f172a; }
 
-    /* Drag handle */
     #drag-handle { width: 5px; flex-shrink: 0; cursor: col-resize; background: transparent; transition: background .15s; position: relative; }
     #drag-handle:hover, #drag-handle.dragging { background: #2563eb; }
     #drag-handle::after { content:''; position:absolute; inset:0 -3px; }
 
-    /* Action buttons */
     .act-btn {
       padding: 5px 13px; font-size: 12.5px; border: 1px solid #e5e7eb;
       border-radius: 8px; background: #fff; color: #374151; cursor: pointer;
@@ -127,14 +117,11 @@
     }
     .act-btn-green:hover { background: #047857; }
 
-    /* Reading width limit */
     #version-rendered, #official-rendered { max-width: 900px; }
 
-    /* Tab close button: collapse to zero width when hidden so it takes no space */
     .tab-close-btn { width: 0; overflow: hidden; opacity: 0; transition: width .15s, opacity .15s; }
     .tab-wrap:hover .tab-close-btn { width: 17px; opacity: 1; }
 
-    /* Diff change count badge */
     #btn-diff[data-badge]:not([data-badge=""])::after {
       content: attr(data-badge);
       background: #ef4444; color: #fff;
@@ -142,21 +129,33 @@
       padding: 1px 5px; margin-left: 3px; vertical-align: middle;
     }
 
-    /* Mobile */
     @media (max-width: 768px) {
       #sidebar { display: none !important; }
       #desktop-header { display: none !important; }
       #mobile-header { display: flex !important; }
       #view-copy { display: none !important; }
     }
-    /* Mobile tab underline style */
     .mobile-tab-btn { padding:8px 14px; font-size:13px; border:none; border-bottom:2px solid transparent; background:transparent; color:#64748b; cursor:pointer; font-weight:400; white-space:nowrap; transition:all .12s; }
     .mobile-tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:600; }
+
+    .overlay-box { background:#fff; border-radius:16px; width:100%; }
+
+    .help-section { margin-bottom:14px; }
+    .help-title { font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px; }
+    .help-list { margin:0; padding-left:18px; color:#4b5563; }
+
+    .nav-divider { font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#475569; padding:9px 8px 3px; font-weight:600; }
+
+    .btn-hover-red:hover:not(:disabled) { border-color:#ef4444 !important; color:#ef4444 !important; background:#fef2f2 !important; }
+    .demo-link:hover { background:#065f46 !important; }
+    .btn-help-desk:hover { border-color:#2563eb !important; color:#2563eb !important; }
+    .btn-save-desk:hover { background:#1d4ed8 !important; }
+    .btn-sugg-reject:hover { background:#fee2e2 !important; }
+    .btn-mobile-add-sugg:hover { border-color:#2563eb !important; color:#2563eb !important; }
   </style>
 </head>
 <body style="display:flex; height:100vh; overflow:hidden; font-family:'Helvetica Neue',Arial,'PingFang TC',sans-serif; background:#f1f5f9;">
 
-  <!-- ─── Sidebar ─────────────────────────────────────────────────────────── -->
   <aside id="sidebar" style="width:224px; min-width:224px; background:#0f172a; color:#fff; display:flex; flex-direction:column; height:100%; overflow-y:auto; flex-shrink:0;">
 
     <div style="padding:14px 16px 10px; border-bottom:1px solid #1e293b;">
@@ -165,9 +164,8 @@
     </div>
 
     <div style="padding:8px 10px; border-bottom:1px solid #1e293b;">
-      <a href="https://yjholt.readdy.co" target="_blank" rel="noopener"
-         style="display:flex; align-items:center; gap:6px; padding:7px 11px; background:#064e3b; border-radius:8px; color:#a7f3d0; font-size:12.5px; font-weight:500; text-decoration:none; transition:background .15s;"
-         onmouseover="this.style.background='#065f46'" onmouseout="this.style.background='#064e3b'">
+      <a href="https://yjholt.readdy.co" target="_blank" rel="noopener" class="demo-link"
+         style="display:flex; align-items:center; gap:6px; padding:7px 11px; background:#064e3b; border-radius:8px; color:#a7f3d0; font-size:12.5px; font-weight:500; text-decoration:none; transition:background .15s;">
         <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
         Demo 網站
       </a>
@@ -176,10 +174,8 @@
     <nav style="flex:1; padding:6px 8px;" id="nav-list"></nav>
   </aside>
 
-  <!-- ─── Main ───────────────────────────────────────────────────────────── -->
   <div style="flex:1; display:flex; flex-direction:column; min-width:0; height:100%; overflow:hidden;">
 
-    <!-- Mobile Header -->
     <div id="mobile-header" style="display:none; background:#0f172a; color:#fff; height:52px; flex-shrink:0; align-items:center; padding:0 10px; gap:6px; border-bottom:1px solid #1e293b;">
       <button id="btn-mobile-menu" style="width:34px; height:34px; border:none; background:transparent; color:#94a3b8; cursor:pointer; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -197,34 +193,26 @@
       <div style="flex:1;"></div>
       <span id="sync-status" style="font-size:11px; color:#94a3b8;"></span>
       <div id="status-indicator" style="display:none;"></div>
-      <button id="btn-help" title="使用說明" style="width:30px; height:30px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; color:#64748b; cursor:pointer; font-size:13px; font-weight:600; flex-shrink:0; transition:all .12s;"
-        onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">i</button>
-      <button id="btn-save" title="立即儲存" style="padding:5px 14px; font-size:12.5px; border:none; border-radius:8px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; transition:background .12s; flex-shrink:0;"
-        onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">儲存</button>
+      <button id="btn-help" title="使用說明" class="btn-help-desk" style="width:30px; height:30px; border:1px solid #e2e8f0; border-radius:8px; background:#fff; color:#64748b; cursor:pointer; font-size:13px; font-weight:600; flex-shrink:0; transition:all .12s;">i</button>
+      <button id="btn-save" title="立即儲存" class="btn-save-desk" style="padding:5px 14px; font-size:12.5px; border:none; border-radius:8px; background:#2563eb; color:#fff; cursor:pointer; font-weight:500; transition:background .12s; flex-shrink:0;">儲存</button>
     </header>
 
     <div style="flex:1; overflow:hidden; padding:14px; display:flex; gap:10px;" id="content-wrap">
 
-      <!-- Loading -->
       <div id="view-loading" style="flex:1; display:flex; align-items:center; justify-content:center; color:#94a3b8;">
         <div style="text-align:center; font-size:14px;">載入中...</div>
       </div>
 
-      <!-- Site Map -->
       <div id="view-sitemap" style="display:none; flex:1; background:#fff; border-radius:12px; border:1px solid #e2e8f0; overflow-y:auto; padding:22px 26px;">
         <div id="sitemap-content" class="prose"></div>
       </div>
 
-      <!-- Copy view: versions + drag + official -->
       <div id="view-copy" style="display:none; flex:1; gap:0; min-width:0; overflow:hidden;">
 
-        <!-- Versions panel -->
         <div id="panel-versions" style="flex:1; min-width:200px; display:flex; flex-direction:column; background:#fff; border-radius:12px 0 0 12px; border:1px solid #e2e8f0; border-right:none; overflow:hidden;">
-          <!-- Tab bar -->
           <div style="display:flex; align-items:center; border-bottom:1px solid #f1f5f9; padding:5px 10px; background:#f8fafc; flex-shrink:0; gap:3px; overflow-x:auto;">
             <div id="version-tabs" style="display:flex; gap:3px; flex:1; align-items:center;"></div>
-            <button id="btn-del-version" title="刪除目前版本"
-              style="width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s;"
+            <button id="btn-del-version" title="刪除目前版本" class="btn-icon"
               onmouseover="if(!this.disabled){this.style.borderColor='#ef4444';this.style.color='#ef4444';this.style.background='#fef2f2';}"
               onmouseout="if(!this.disabled){this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
@@ -233,14 +221,12 @@
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
             </button>
           </div>
-          <!-- Editable content -->
           <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;" id="version-edit-wrap">
             <div class="edit-zone" id="edit-zone-version" style="flex:1; overflow-y:auto; margin:14px 16px;">
               <div class="rendered prose" id="version-rendered"></div>
             </div>
             <textarea id="version-md-textarea" class="md-textarea" spellcheck="false"></textarea>
           </div>
-          <!-- Footer actions -->
           <div style="flex-shrink:0; border-top:1px solid #f1f5f9; padding:7px 12px; background:#f8fafc; display:flex; align-items:center; gap:6px;">
             <a id="btn-request-review" href="#" style="font-size:12px; color:#94a3b8; text-decoration:underline; cursor:pointer;" onclick="return false;">請求審查</a>
             <div style="flex:1;"></div>
@@ -248,17 +234,14 @@
           </div>
         </div>
 
-        <!-- Drag handle -->
         <div id="drag-handle"></div>
 
-        <!-- Official panel -->
         <div id="panel-official" style="flex:1; min-width:150px; display:flex; flex-direction:column; background:#fff; border-radius:0 12px 12px 0; border:1px solid #e2e8f0; border-left:none; overflow:hidden;">
           <div style="border-bottom:1px solid #f1f5f9; padding:8px 14px; background:#f8fafc; flex-shrink:0; display:flex; align-items:center; gap:6px;">
             <span style="font-size:12px; font-weight:600; color:#374151; letter-spacing:.03em;">正式版</span>
             <span style="font-size:10.5px; color:#94a3b8; background:#f1f5f9; border-radius:4px; padding:1px 5px;">Official</span>
             <div style="flex:1;"></div>
-            <button id="btn-diff" title="顯示版本與正式版的差異"
-              style="width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; font-size:10px; font-weight:700; letter-spacing:-.5px;"
+            <button id="btn-diff" title="顯示版本與正式版的差異" class="btn-icon" style="font-size:10px; font-weight:700; letter-spacing:-.5px;"
               onmouseover="if(!this.dataset.on){this.style.borderColor='#7c3aed';this.style.color='#7c3aed';this.style.background='#f5f3ff';}"
               onmouseout="if(!this.dataset.on){this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';}">≠</button>
             <button id="btn-export-official" class="md-toggle-btn" title="下載 official.md（可提交至 versions 資料夾）">
@@ -286,20 +269,16 @@
 
       </div>
 
-      <!-- Mobile copy view -->
       <div id="view-mobile-copy" style="display:none; flex:1; flex-direction:column; overflow:hidden; background:#f1f5f9;">
-        <!-- Tab bar -->
-        <div id="mobile-tab-bar" style="background:#fff; border-bottom:1px solid #e2e8f0; padding:0 10px; flex-shrink:0; display:flex; align-items:flex-end; gap:0; overflow-x:auto;"></div>
-        <!-- Content -->
+          <div id="mobile-tab-bar" style="background:#fff; border-bottom:1px solid #e2e8f0; padding:0 10px; flex-shrink:0; display:flex; align-items:flex-end; gap:0; overflow-x:auto;"></div>
         <div style="flex:1; overflow:hidden; display:flex; flex-direction:column; margin:10px 10px 0; background:#fff; border-radius:12px 12px 0 0; border:1px solid #e2e8f0; border-bottom:none;">
           <div class="edit-zone" id="edit-zone-mobile" style="flex:1; overflow-y:auto; margin:12px 14px;">
             <div class="rendered prose" id="mobile-rendered"></div>
           </div>
         </div>
-        <!-- Footer -->
         <div style="flex-shrink:0; background:#fff; border:1px solid #e2e8f0; border-top:1px solid #f1f5f9; margin:0 10px; margin-bottom:max(10px, env(safe-area-inset-bottom)); border-radius:0 0 12px 12px; padding:10px 14px; display:flex; flex-direction:column; gap:6px;">
           <div style="display:flex; align-items:center; gap:8px;">
-            <button id="btn-mobile-add-sugg" style="padding:4px 10px; font-size:12px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer;" onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb';" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';">＋ 建議</button>
+            <button id="btn-mobile-add-sugg" class="btn-mobile-add-sugg" style="padding:4px 10px; font-size:12px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer;">＋ 建議</button>
             <div style="flex:1;"></div>
             <button id="btn-mobile-set-official" class="act-btn-primary" style="display:none; font-size:12px; padding:5px 10px;">設為正式版</button>
             <button id="btn-mobile-confirm" class="act-btn-green" style="font-size:12px; padding:5px 10px;">主管確認</button>
@@ -310,7 +289,6 @@
     </div>
   </div>
 
-  <!-- ─── Confirm Dialog ────────────────────────────────────────────────── -->
   <div id="confirm-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:600; align-items:center; justify-content:center; padding:20px;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:340px; padding:22px 24px; box-shadow:0 20px 50px rgba(0,0,0,.2);">
       <div id="confirm-title" style="font-size:15px; font-weight:600; color:#0f172a; margin-bottom:6px;"></div>
@@ -322,28 +300,22 @@
     </div>
   </div>
 
-  <!-- ─── Suggestion Modal ────────────────────────────────────────────────── -->
   <div id="suggestion-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:500; align-items:center; justify-content:center; padding:20px;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:440px; max-height:82vh; display:flex; flex-direction:column; box-shadow:0 20px 50px rgba(0,0,0,.25);">
-      <!-- Header -->
       <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px 12px; flex-shrink:0; border-bottom:1px solid #f1f5f9;">
         <span style="font-size:15px; font-weight:700; color:#0f172a;">新增建議</span>
         <button id="btn-sugg-close" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#64748b; cursor:pointer; border-radius:7px; font-size:16px; display:flex; align-items:center; justify-content:center;">×</button>
       </div>
-      <!-- Scrollable body -->
       <div style="flex:1; overflow-y:auto; padding:12px 20px;">
-        <!-- Past comments list -->
-        <div id="sugg-comments-list"></div>
-        <!-- New input -->
-        <textarea id="sugg-text" placeholder="輸入建議內容…" style="width:100%; height:90px; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; font-size:13px; line-height:1.55; resize:vertical; outline:none; box-sizing:border-box; font-family:inherit;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+          <div id="sugg-comments-list"></div>
+          <textarea id="sugg-text" placeholder="輸入建議內容…" style="width:100%; height:90px; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; font-size:13px; line-height:1.55; resize:vertical; outline:none; box-sizing:border-box; font-family:inherit;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
         <div style="margin-top:8px;">
           <label style="display:block; font-size:12px; color:#6b7280; margin-bottom:4px;">附件（圖片／影片，選填）</label>
           <input id="sugg-file" type="file" accept="image/*,video/*" style="font-size:12px; color:#374151; width:100%;" />
         </div>
       </div>
-      <!-- Footer -->
       <div style="flex-shrink:0; padding:10px 20px 16px; border-top:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-        <button id="btn-sugg-reject" style="padding:5px 13px; font-size:12.5px; border:1px solid #fca5a5; border-radius:8px; background:#fff; color:#991b1b; cursor:pointer; transition:background .12s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">駁回正式版</button>
+        <button id="btn-sugg-reject" class="btn-sugg-reject" style="padding:5px 13px; font-size:12.5px; border:1px solid #fca5a5; border-radius:8px; background:#fff; color:#991b1b; cursor:pointer; transition:background .12s;">駁回正式版</button>
         <div style="display:flex; gap:8px;">
           <button id="btn-sugg-cancel" class="act-btn">取消</button>
           <button id="btn-sugg-submit" class="act-btn-primary">送出建議</button>
@@ -352,7 +324,6 @@
     </div>
   </div>
 
-  <!-- Help Modal -->
   <div id="help-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:300; align-items:center; justify-content:center; padding:20px;">
     <div style="background:#fff; border-radius:16px; width:100%; max-width:460px; max-height:85vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,.25);">
       <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 22px 12px; border-bottom:1px solid #f1f5f9; position:sticky; top:0; background:#fff; border-radius:16px 16px 0 0;">
@@ -360,16 +331,16 @@
         <button id="btn-help-close" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#64748b; cursor:pointer; border-radius:7px; font-size:16px; display:flex; align-items:center; justify-content:center;">×</button>
       </div>
       <div style="padding:18px 22px 22px; font-size:13.5px; color:#374151; line-height:1.7;">
-        <div style="margin-bottom:14px;">
-          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">📋 頁面導覽</div>
-          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+        <div class="help-section">
+          <div class="help-title">📋 頁面導覽</div>
+          <ul class="help-list">
             <li>左側選單選擇欲查看的頁面</li>
             <li>手機版點左上角 ☰ 開啟選單</li>
           </ul>
         </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">📑 版本管理</div>
-          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+        <div class="help-section">
+          <div class="help-title">📑 版本管理</div>
+          <ul class="help-list">
             <li><strong>原版</strong>：第一個 tab，顯示改版前官網原始文案（唯讀）</li>
             <li><strong>Readdy.AI</strong>：第一個 AI 生成版本</li>
             <li><strong>AI版_v1 / AI版_v2…</strong>：後續新增版本依序命名</li>
@@ -377,42 +348,42 @@
             <li>點擊版本 tab 下方的區塊標題可快速跳至對應段落</li>
           </ul>
         </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">✏️ 編輯文案</div>
-          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+        <div class="help-section">
+          <div class="help-title">✏️ 編輯文案</div>
+          <ul class="help-list">
             <li>點擊任意文字區塊即可直接編輯</li>
             <li>右側<strong>正式版</strong>顯示已渲染格式；左側正式版區塊標示<code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">內容形式</code>供參考</li>
             <li>點「設為正式版」將目前版本複製到正式版</li>
             <li>右上角 <strong>&lt;/&gt;</strong> 切換為 Markdown 原始碼編輯模式（原版 tab 不支援）</li>
           </ul>
         </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">💾 儲存與同步</div>
-          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+        <div class="help-section">
+          <div class="help-title">💾 儲存與同步</div>
+          <ul class="help-list">
             <li>編輯後自動存入本機，狀態顯示<span style="background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:5px; font-size:11.5px; font-weight:600; margin:0 3px;">待同步</span></li>
             <li>點右上角<strong>「儲存」按鈕</strong>才會同步到雲端</li>
             <li>不同裝置開啟時自動載入最新雲端資料</li>
           </ul>
         </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">🔄 審查流程</div>
-          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+        <div class="help-section">
+          <div class="help-title">🔄 審查流程</div>
+          <ul class="help-list">
             <li>「請求審查」→ 狀態改為<span style="background:#fef3c7; color:#92400e; padding:1px 6px; border-radius:5px; font-size:11.5px; font-weight:600; margin:0 3px;">待審查</span></li>
             <li>「主管確認」→ 狀態改為<span style="background:#d1fae5; color:#065f46; padding:1px 6px; border-radius:5px; font-size:11.5px; font-weight:600; margin:0 3px;">已確認</span></li>
             <li>確認後正式版鎖定，如需修改先點「駁回」</li>
           </ul>
         </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">💬 建議留言</div>
-          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+        <div class="help-section">
+          <div class="help-title">💬 建議留言</div>
+          <ul class="help-list">
             <li>點右下角「＋ 建議」開啟留言視窗，可附上截圖附件</li>
             <li>附件點擊後可直接下載</li>
             <li>留言以折疊方式顯示，點標題展開；可編輯或刪除</li>
           </ul>
         </div>
         <div>
-          <div style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:#2563eb; margin-bottom:6px;">❓ 其他</div>
-          <ul style="margin:0; padding-left:18px; color:#4b5563;">
+          <div class="help-title">❓ 其他</div>
+          <ul class="help-list">
             <li>點右上角 <strong>i</strong> 隨時重新查看此說明</li>
             <li>拖拉中間分隔線可調整左右面板寬度</li>
           </ul>
@@ -421,7 +392,6 @@
     </div>
   </div>
 
-  <!-- Mobile Drawer -->
   <div id="mobile-drawer" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.5);">
     <div style="position:absolute; top:0; left:0; bottom:0; width:260px; background:#0f172a; overflow-y:auto; display:flex; flex-direction:column;">
       <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 12px 10px; border-bottom:1px solid #1e293b; flex-shrink:0;">
@@ -440,18 +410,10 @@
   </div>
 
   <script>
-    // ── Config ────────────────────────────────────────────────────────────────
-    const STORAGE_KEY = 'oright-copy-v3';  // v3: contenteditable editing, HTML storage
-
-    // ── Sync config (injected by GitHub Actions from Secrets) ─────────────────
-    // FIREBASE_URL: Firebase Realtime Database base URL (no trailing slash)
-    //   e.g. https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app
-    // Rules must allow public read/write (internal tool — URL is the access control)
+    const STORAGE_KEY = 'oright-copy-v3';
     const FIREBASE_URL = 'PLACEHOLDER_FIREBASE_URL';
     const SYNC_ON = !FIREBASE_URL.startsWith('PLACEHOLDER');
 
-    // versionCount = number of vN.md files in website/versions/[id]/
-    // Update this when adding new version files to the folder
     const PAGES = [
       { id: 'sitemap',        name: 'Site Map',      file: '00_Site_Map.md',        isSiteMap: true },
       { id: '01_首頁',         name: '首頁',           file: '01_首頁.md',             route: '/',                   versionCount: 3 },
@@ -469,7 +431,6 @@
       { id: '14_百貨體驗館',   name: '百貨體驗館',     file: '14_百貨體驗館.md',       route: '/store',              versionCount: 3 },
     ];
 
-    // ── State ─────────────────────────────────────────────────────────────────
     let currentPageId     = null;
     let currentVersionIdx = 0;
     let storage           = {};
@@ -481,22 +442,17 @@
     let currentSectionAnchor = null;   // topmost visible H2 text when switching versions
     let sectionTrackerBound  = false;
 
-    // ── Storage ───────────────────────────────────────────────────────────────
-
     async function loadStorage() {
-      // Load from localStorage first (instant)
       try { storage = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
       catch { storage = {}; }
       if (!storage.pages) storage.pages = {};
 
-      // Then pull latest from JSONBin (authoritative cross-device source)
       if (SYNC_ON) {
         showSyncStatus('syncing');
         try {
           const r = await fetch(`${FIREBASE_URL}/oright-copy.json`);
           if (r.ok) {
             const raw = await r.json();
-            // Support compressed format {z: '...'} and legacy uncompressed {pages: {...}}
             let data = raw;
             if (raw && raw.z) {
               try { data = JSON.parse(await decompress(raw.z)); } catch { data = null; }
@@ -516,12 +472,10 @@
       showSyncStatus('pending');
     }
 
-    // Save without changing sync status (for non-content state changes like active tab)
     function saveQuiet() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
     }
 
-    // ── Compression helpers (deflate-raw via CompressionStream) ──────────────
     async function compress(str) {
       const cs = new CompressionStream('deflate-raw');
       const writer = cs.writable.getWriter();
@@ -532,7 +486,6 @@
       while (true) { const {done, value} = await reader.read(); if (done) break; chunks.push(value); }
       const total = new Uint8Array(chunks.reduce((a, c) => a + c.length, 0));
       let off = 0; for (const c of chunks) { total.set(c, off); off += c.length; }
-      // btoa in chunks to avoid call-stack overflow on large strings
       let bin = ''; for (let i = 0; i < total.length; i++) bin += String.fromCharCode(total[i]);
       return btoa(bin);
     }
@@ -553,7 +506,6 @@
       return new TextDecoder().decode(total);
     }
 
-    // Upload current storage to JSONBin (full data, deflate-compressed)
     async function syncToCloud() {
       if (!SYNC_ON) return;
       showSyncStatus('syncing');
@@ -581,14 +533,7 @@
       if (m) { m.textContent = txt; m.style.color = c; }
     }
     function getPage(id) { return storage.pages[id]; }
-    function initPage(id, markdownContent) {
-      const html = marked.parse(markdownContent);
-      storage.pages[id] = { versions: [{ name: '版本1', content: html }], official: html, activeIdx: 0, status: 'draft' };
-      save();
-      return storage.pages[id];
-    }
 
-    // ── Version naming ─────────────────────────────────────────────────────────
     function getVersionName(i) {
       if (i === 1) return 'Readdy.AI';
       if (i === 2) return 'AI版_v1';
@@ -605,16 +550,13 @@
       });
     }
 
-    // ── Fetch ──────────────────────────────────────────────────────────────────
     async function fetchMd(file) {
-      // Try same directory (GitHub Pages deploy), then parent directory (local dev)
       let r = await fetch(file);
       if (!r.ok) r = await fetch('../' + file);
       if (!r.ok) throw new Error(r.status);
       return r.text();
     }
 
-    // Fetch a versioned file: versions/[pageId]/v1.md, v2.md, …
     async function fetchVersionMd(pageId, vNum) {
       const path = `versions/${pageId}/v${vNum}.md`;
       let r = await fetch(path);
@@ -623,7 +565,6 @@
       return r.text();
     }
 
-    // ── Views ──────────────────────────────────────────────────────────────────
     function showView(name) {
       const mobile = window.innerWidth <= 768;
       document.getElementById('view-loading').style.display  = name === 'loading'  ? 'flex'  : 'none';
@@ -632,13 +573,12 @@
       document.getElementById('view-mobile-copy').style.display = (mobile && name === 'copy') ? 'flex' : 'none';
     }
 
-    // ── Sidebar nav ────────────────────────────────────────────────────────────
     function buildNav() {
       const nav = document.getElementById('nav-list');
       nav.innerHTML = '';
       function divider(label) {
         const d = document.createElement('div');
-        d.style.cssText = 'font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#475569; padding:9px 8px 3px; font-weight:600;';
+        d.className = 'nav-divider';
         d.textContent = label;
         nav.appendChild(d);
       }
@@ -662,7 +602,6 @@
       let childContainer = null;
 
       if (hasChildren) {
-        // Row: [toggle arrow] [nav button]
         const row = document.createElement('div');
         row.style.cssText = 'display:flex; align-items:center;';
 
@@ -727,27 +666,22 @@
 
     function updateNavBadge(pageId) {
       const pd = getPage(pageId);
-      const badge = document.querySelector(`[data-badge-for="${pageId}"]`);
-      if (!badge) return;
-      badge.className = '';
-      badge.textContent = '';
-      if (!pd) return;
-      if (pd.status === 'review') {
-        badge.className = 'badge-review'; badge.textContent = '待審查';
-      } else if (pd.status === 'confirmed') {
-        badge.className = 'badge-confirmed'; badge.textContent = '已確認';
-      } else if (pd.status === 'rejected') {
-        badge.className = 'badge-rejected'; badge.textContent = '已駁回';
-      }
+      [`[data-badge-for="${pageId}"]`, `[data-mobile-badge-for="${pageId}"]`].forEach(sel => {
+        const badge = document.querySelector(sel);
+        if (!badge) return;
+        badge.className = ''; badge.textContent = '';
+        if (!pd) return;
+        if (pd.status === 'review')     { badge.className = 'badge-review'; badge.textContent = '待審查'; }
+        else if (pd.status === 'confirmed') { badge.className = 'badge-confirmed'; badge.textContent = '已確認'; }
+        else if (pd.status === 'rejected')  { badge.className = 'badge-rejected'; badge.textContent = '已駁回'; }
+      });
     }
 
     function updateAllBadges() {
       PAGES.forEach(p => { if (!p.isSiteMap) updateNavBadge(p.id); });
     }
 
-    // ── Navigate ───────────────────────────────────────────────────────────────
     async function navigate(pageId) {
-      // Save any open edit before navigating
       saveActiveEdit();
       currentPageId = pageId;
       currentVersionIdx = 0;
@@ -765,7 +699,6 @@
         await loadCopyPage(page);
       }
 
-      // Scroll all content panes to top on page switch
       ['edit-zone-version', 'edit-zone-official', 'edit-zone-mobile', 'view-sitemap'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.scrollTop = 0;
@@ -784,12 +717,9 @@
 
     async function loadCopyPage(page) {
       let pd = getPage(page.id);
-      // pd may exist with only {status, activeIdx} from cloud metadata merge but no versions —
-      // treat that the same as first-time load.
       if (!pd || !pd.versions || pd.versions.length === 0) {
         const existingStatus    = pd?.status    || 'draft';
         const existingActiveIdx = pd?.activeIdx || 0;
-        // First time (or metadata-only): load all version files
         const vCount = page.versionCount || 1;
         const versions = [];
         for (let i = 1; i <= vCount; i++) {
@@ -798,21 +728,18 @@
             versions.push({ name: getVersionName(i), content: marked.parse(md) });
           } catch { break; }
         }
-        // Fallback to original .md if no version files found
         if (versions.length === 0) {
           let content = '';
           try { content = await fetchMd(page.file); }
           catch { content = `> **載入失敗**：請透過 HTTP 伺服器開啟此頁。\n\n（檔案：${page.file}）`; }
           versions.push({ name: '版本1', content: marked.parse(content) });
         }
-        // Try to load official.md from versions folder (overrides v1 default)
         let officialContent = versions[0].content;
         try {
           let or = await fetch(`versions/${page.id}/official.md`);
           if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
           if (or.ok) officialContent = marked.parse(await or.text());
         } catch {}
-        // Try to load original.md
         let originalContent = null;
         try {
           let or2 = await fetch(`versions/${page.id}/original.md`);
@@ -823,7 +750,6 @@
         storage.pages[page.id] = pd;
         save();
       } else {
-        // Page exists in storage: check if new version files have been added
         const vCount = page.versionCount || 1;
         if (pd.versions.length < vCount) {
           for (let i = pd.versions.length + 1; i <= vCount; i++) {
@@ -834,7 +760,6 @@
           }
           save();
         }
-        // Always re-fetch official.md so file changes (e.g. new labels) are reflected immediately
         try {
           let or = await fetch(`versions/${page.id}/official.md`);
           if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
@@ -843,7 +768,6 @@
             save();
           }
         } catch {}
-        // Always re-fetch original.md
         try {
           let or2 = await fetch(`versions/${page.id}/original.md`);
           if (!or2.ok) or2 = await fetch(`../versions/${page.id}/original.md`);
@@ -854,7 +778,7 @@
         } catch {}
       }
       currentVersionIdx = 0;
-      currentSectionAnchor = null;   // reset on page switch
+      currentSectionAnchor = null;
       migrateVersionNames(pd);
       renderTabs(pd);
       renderVersionContent(pd);
@@ -866,12 +790,10 @@
       mobileActiveTab = -1;
       renderMobileView(pd);
       updateMobileStatusBadge(pd.status);
-      updateMobileReviewBtn(pd.status);
       updateMobileConfirmBtn(pd.status, pd.confirmedAt);
       showView('copy');
     }
 
-    // ── Render ─────────────────────────────────────────────────────────────────
     function renderTabs(pd) {
       const container = document.getElementById('version-tabs');
       container.innerHTML = '';
@@ -911,7 +833,6 @@
         container.appendChild(wrap);
       });
 
-      // Inline + button right after the last tab
       const addBtn = document.createElement('button');
       addBtn.title = '新增版本';
       addBtn.style.cssText = 'width:22px; height:22px; border:1px dashed #cbd5e1; border-radius:6px; background:transparent; color:#94a3b8; font-size:16px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; line-height:1; transition:all .15s; margin-left:2px;';
@@ -932,7 +853,6 @@
       });
       container.appendChild(addBtn);
 
-      // Update delete button state (disabled when only 1 version or on version 1)
       const delBtn = document.getElementById('btn-del-version');
       if (delBtn) {
         const canDelete = pd.versions.length > 1 && currentVersionIdx >= 0;
@@ -944,7 +864,6 @@
 
     const DIFF_LEAF = 'td, th, p, li, h1, h2, h3, h4, h5, h6';
 
-    // Override table-layout to auto for 3+ column tables so content-heavy columns get more space
     function adjustTableLayouts(el) {
       el.querySelectorAll('table').forEach(t => {
         const firstRow = t.querySelector('tr');
@@ -952,7 +871,6 @@
       });
     }
 
-    // Wrap every <table> in a horizontally-scrollable div for mobile
     function wrapTablesForScroll(html) {
       const doc = new DOMParser().parseFromString(html, 'text/html');
       doc.querySelectorAll('table').forEach(table => {
@@ -969,12 +887,10 @@
       const vDoc = new DOMParser().parseFromString(vHtml, 'text/html');
       const oDoc = new DOMParser().parseFromString(oHtml, 'text/html');
 
-      // Normalise whitespace before comparing so minor spacing diffs don't flag
       const oSet = new Set(
         [...oDoc.querySelectorAll(DIFF_LEAF)].map(normTxt).filter(Boolean)
       );
 
-      // Strip ALL residual inline styles from stored HTML before re-applying diff highlights
       vDoc.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
 
       [...vDoc.querySelectorAll(DIFF_LEAF)].forEach(el => {
@@ -1000,7 +916,6 @@
       }
     }
 
-    // ── Section anchor tracking ────────────────────────────────────────────────
     function setupSectionTracker() {
       if (sectionTrackerBound) return;
       sectionTrackerBound = true;
@@ -1040,7 +955,6 @@
         el.innerHTML = pd.original || '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（原版內容尚未填入）</p>';
         adjustTableLayouts(el);
         exitEditZone('version');
-        setupSectionTracker();
         return;
       }
       if (mdToggleBtn) mdToggleBtn.style.display = '';
@@ -1051,7 +965,6 @@
         el.innerHTML = vHtml;
       }
       adjustTableLayouts(el);
-      // Update diff badge with count of highlighted (changed) cells
       const badge = el.querySelectorAll('[style*="fef9c3"]').length;
       const btn = document.getElementById('btn-diff');
       if (btn) btn.dataset.badge = badge > 0 ? badge : '';
@@ -1068,7 +981,7 @@
     }
 
     function switchVersion(idx) {
-      const anchor = currentSectionAnchor;   // capture before re-render
+      const anchor = (currentVersionIdx !== -2 && idx !== -2) ? currentSectionAnchor : null;
       currentVersionIdx = idx;
       const pd = getPage(currentPageId);
       if (idx >= 0) { pd.activeIdx = idx; saveQuiet(); }
@@ -1089,7 +1002,6 @@
       if (window.innerWidth <= 768) renderMobileView(pd);
     }
 
-    // ── Delete current version ──────────────────────────────────────────────────
     document.getElementById('btn-del-version').addEventListener('click', () => {
       const pd = getPage(currentPageId);
       if (!pd || pd.versions.length <= 1 || currentVersionIdx < 0) return;
@@ -1100,7 +1012,6 @@
     });
 
 
-    // ── Inline editing (contenteditable) ───────────────────────────────────────
     function enterEditZone(which) {
       const zone     = document.getElementById(`edit-zone-${which}`);
       const rendered = document.getElementById(`${which}-rendered`);
@@ -1110,7 +1021,6 @@
       rendered.contentEditable = 'true';
       editDirty[which] = false;
       rendered.focus();
-      // Move caret to end
       const sel = window.getSelection();
       const range = document.createRange();
       range.selectNodeContents(rendered);
@@ -1132,7 +1042,6 @@
       if (!dirty) { exitEditZone(which); return; }
 
       const rendered = document.getElementById(`${which}-rendered`);
-      // Strip diff highlight styles that may have been pasted in
       const cleanHtml = (() => {
         const doc = new DOMParser().parseFromString(rendered.innerHTML, 'text/html');
         doc.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
@@ -1159,7 +1068,6 @@
       if (mobileZone && mobileZone.classList.contains('editing')) saveMobileEditZone();
     }
 
-    // Scroll sync helper: find clicked leaf index → scroll matching leaf in other panel
     function syncScroll(e, sourceRenderedId, targetRenderedId) {
       const source = document.getElementById(sourceRenderedId);
       const target = document.getElementById(targetRenderedId);
@@ -1172,8 +1080,8 @@
       if (peer) peer.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    // Click on rendered → enter edit + scroll sync
     document.getElementById('version-rendered').addEventListener('click', e => {
+      if (currentVersionIdx === -2) return;
       syncScroll(e, 'version-rendered', 'official-rendered');
       enterEditZone('version');
     });
@@ -1182,7 +1090,6 @@
       enterEditZone('official');
     });
 
-    // Input → mark dirty; official input also live-updates diff in version panel
     document.getElementById('version-rendered').addEventListener('input', () => { editDirty.version = true; });
     let diffDebounceTimer = null;
     document.getElementById('official-rendered').addEventListener('input', () => {
@@ -1199,15 +1106,12 @@
       }
     });
 
-    // Blur → save
     document.getElementById('version-rendered').addEventListener('blur',  () => saveEditZone('version'));
     document.getElementById('official-rendered').addEventListener('blur', () => saveEditZone('official'));
 
-    // Ctrl/Cmd+1~9 → switch version tab
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '9') {
         const activeEl = document.activeElement;
-        // Don't intercept when typing in contenteditable or textarea
         if (activeEl && (activeEl.isContentEditable || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) return;
         e.preventDefault();
         const idx = parseInt(e.key) - 1;
@@ -1216,7 +1120,6 @@
       }
     });
 
-    // Ctrl/Cmd+S → save but stay in edit
     function handleEditKey(e, which) {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
@@ -1227,7 +1130,6 @@
     document.getElementById('version-rendered').addEventListener('keydown',  e => handleEditKey(e, 'version'));
     document.getElementById('official-rendered').addEventListener('keydown', e => handleEditKey(e, 'official'));
 
-    // ── Set as official ────────────────────────────────────────────────────────
     document.getElementById('btn-set-official').addEventListener('click', () => {
       saveActiveEdit();
       showConfirm('設為正式版', '確定要將此版本設為正式版？正式版的現有內容將被覆蓋。', () => {
@@ -1242,7 +1144,6 @@
       });
     });
 
-    // ── Export official.md ─────────────────────────────────────────────────────
     function downloadOfficialMd() {
       const pd = getPage(currentPageId);
       if (!pd) return;
@@ -1256,7 +1157,6 @@
     }
     document.getElementById('btn-export-official').addEventListener('click', downloadOfficialMd);
 
-    // ── Request / cancel review ────────────────────────────────────────────────
     function updateReviewBtn(status) {
       const btn = document.getElementById('btn-request-review');
       if (status === 'review') {
@@ -1293,7 +1193,6 @@
       }
     });
 
-    // ── Manager confirm ────────────────────────────────────────────────────────
     function updateConfirmBtn(status, confirmedAt) {
       const btn = document.getElementById('btn-confirm-official');
       const ts  = document.getElementById('confirm-timestamp');
@@ -1377,7 +1276,6 @@
       }
     }
 
-    // ── Confirm dialog (shared) ────────────────────────────────────────────────
     function showConfirm(title, body, cb) {
       confirmCb = cb;
       document.getElementById('confirm-title').textContent = title;
@@ -1397,7 +1295,6 @@
       if (e.target === e.currentTarget) { document.getElementById('confirm-overlay').style.display = 'none'; confirmCb = null; }
     });
 
-    // ── Markdown toggle view ────────────────────────────────────────────────────
     const iconCode = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`;
     const iconEye  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     let mdMode = { version: false, official: false };
@@ -1405,7 +1302,6 @@
     function makeTurndown() {
       const td = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-' });
       if (typeof turndownPluginGfm !== 'undefined') td.use(turndownPluginGfm.gfm);
-      // Preserve <br> as literal HTML — a bare newline breaks GFM table cells on re-parse
       td.addRule('br', { filter: 'br', replacement: () => '<br>' });
       return td;
     }
@@ -1419,7 +1315,6 @@
         if (currentVersionIdx === -2) return;
         pd.versions[currentVersionIdx].content = html;
         save();
-        // Re-render with diff if active
         const el = document.getElementById('version-rendered');
         el.innerHTML = (diffMode && pd.official) ? buildDiffHtml(html, pd.official) : html;
         adjustTableLayouts(el);
@@ -1429,7 +1324,6 @@
         const offEl = document.getElementById('official-rendered');
         offEl.innerHTML = html;
         adjustTableLayouts(offEl);
-        // Also refresh version-side diff
         if (diffMode) {
           const vHtml = pd.versions[currentVersionIdx]?.content || '';
           const vEl = document.getElementById('version-rendered');
@@ -1454,7 +1348,6 @@
       const btn = document.getElementById(`btn-toggle-md-${which}`);
 
       if (!mdMode[which]) {
-        // Enter MD view: save any pending edit, convert HTML → MD
         saveEditZone(which);
         const html = document.getElementById(`${which}-rendered`).innerHTML;
         try { textarea.value = makeTurndown().turndown(html); }
@@ -1465,7 +1358,6 @@
         mdMode[which] = true;
         btn.innerHTML = iconEye; btn.title = '切換為預覽模式'; btn.classList.add('active');
       } else {
-        // Exit MD view: parse MD → HTML, save, restore rendered view
         saveMdZone(which);
         editZone.style.display = '';
         textarea.style.display = 'none';
@@ -1484,13 +1376,12 @@
     });
 
 
-    // ── Mobile Nav ─────────────────────────────────────────────────────────────
     function buildMobileNav() {
       const nav = document.getElementById('mobile-nav-list');
       nav.innerHTML = '';
       function mDiv(label) {
         const d = document.createElement('div');
-        d.style.cssText = 'font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:#475569; padding:9px 8px 3px; font-weight:600;';
+        d.className = 'nav-divider';
         d.textContent = label;
         nav.appendChild(d);
       }
@@ -1523,19 +1414,8 @@
       });
     }
 
-    function updateMobileNavBadge(pageId) {
-      const pd = getPage(pageId);
-      const badge = document.querySelector(`[data-mobile-badge-for="${pageId}"]`);
-      if (!badge) return;
-      badge.className = ''; badge.textContent = '';
-      if (!pd) return;
-      if (pd.status === 'review')     { badge.className = 'badge-review'; badge.textContent = '待審查'; }
-      else if (pd.status === 'confirmed') { badge.className = 'badge-confirmed'; badge.textContent = '已確認'; }
-      else if (pd.status === 'rejected')  { badge.className = 'badge-rejected';  badge.textContent = '已駁回'; }
-    }
-
     function openMobileDrawer() {
-      PAGES.forEach(p => { if (!p.isSiteMap) updateMobileNavBadge(p.id); });
+      PAGES.forEach(p => { if (!p.isSiteMap) updateNavBadge(p.id); });
       highlightMobileNav(currentPageId);
       document.getElementById('mobile-drawer').style.display = 'block';
       document.body.style.overflow = 'hidden';
@@ -1550,7 +1430,6 @@
     document.getElementById('btn-close-drawer').addEventListener('click', closeMobileDrawer);
     document.getElementById('mobile-drawer').addEventListener('click', e => { if (e.target === e.currentTarget) closeMobileDrawer(); });
 
-    // ── Mobile Content ──────────────────────────────────────────────────────────
     function renderMobileView(pd) {
       renderMobileTabs(pd);
       renderMobileContent(pd);
@@ -1561,21 +1440,12 @@
       const bar = document.getElementById('mobile-tab-bar');
       bar.innerHTML = '';
 
-      // Official tab (first)
       const offBtn = document.createElement('button');
       offBtn.className = 'mobile-tab-btn' + (mobileActiveTab === -1 ? ' active' : '');
       offBtn.textContent = '正式版';
       offBtn.addEventListener('click', () => switchMobileTab(-1));
       bar.appendChild(offBtn);
 
-      // "原版" tab
-      const origBtn = document.createElement('button');
-      origBtn.className = 'mobile-tab-btn' + (mobileActiveTab === -2 ? ' active' : '');
-      origBtn.textContent = '原版';
-      origBtn.addEventListener('click', () => switchMobileTab(-2));
-      bar.appendChild(origBtn);
-
-      // Version tabs (no × button)
       pd.versions.forEach((v, i) => {
         const tab = document.createElement('button');
         tab.className = 'mobile-tab-btn' + (mobileActiveTab === i ? ' active' : '');
@@ -1584,7 +1454,6 @@
         bar.appendChild(tab);
       });
 
-      // + button (inline after last tab)
       const addBtn = document.createElement('button');
       addBtn.textContent = '+';
       addBtn.style.cssText = 'padding:6px 10px; font-size:16px; border:none; background:transparent; color:#94a3b8; cursor:pointer;';
@@ -1600,7 +1469,6 @@
       });
       bar.appendChild(addBtn);
 
-      // Trash button (only when on a deletable version: index > 0 and multiple versions)
       const canDelMobile = mobileActiveTab >= 0 && pd.versions.length > 1;
       const trashBtn = document.createElement('button');
       trashBtn.title = '刪除目前版本';
@@ -1635,7 +1503,6 @@
       document.getElementById('mobile-rendered').contentEditable = 'false';
     }
 
-    // Find the heading currently visible near the top of the mobile scroll area
     function getMobileCurrentHeading() {
       const container = document.getElementById('edit-zone-mobile');
       const rendered  = document.getElementById('mobile-rendered');
@@ -1650,7 +1517,6 @@
       return result;
     }
 
-    // Scroll the mobile container to a heading that matches the given text
     function scrollMobileToHeading(text) {
       if (!text) return;
       const container = document.getElementById('edit-zone-mobile');
@@ -1661,25 +1527,19 @@
     }
 
     function switchMobileTab(tab) {
-      // Save current mobile edit if active
       const zone = document.getElementById('edit-zone-mobile');
       if (zone.classList.contains('editing')) saveMobileEditZone();
-      const headingText = getMobileCurrentHeading(); // remember position
+      const headingText = getMobileCurrentHeading();
       mobileActiveTab = tab;
       const pd = getPage(currentPageId);
       renderMobileView(pd);
-      scrollMobileToHeading(headingText);            // restore position
+      scrollMobileToHeading(headingText);
     }
 
     function updateMobileFooter(pd) {
       const isOfficial = mobileActiveTab === -1;
       document.getElementById('btn-mobile-set-official').style.display = isOfficial ? 'none' : '';
       document.getElementById('btn-mobile-confirm').style.display = isOfficial ? '' : 'none';
-      updateMobileReviewBtn(pd ? pd.status : 'draft');
-    }
-
-    function updateMobileReviewBtn(status) {
-      // Review button removed from mobile footer — no-op
     }
 
     function updateMobileConfirmBtn(status, confirmedAt) {
@@ -1705,7 +1565,6 @@
       else if (status === 'rejected')  { el.className = 'badge-rejected';  el.textContent = '已駁回'; }
     }
 
-    // Mobile inline editing
     function saveMobileEditZone() {
       const rendered = document.getElementById('mobile-rendered');
       const html = (() => {
@@ -1735,7 +1594,6 @@
       if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveMobileEditZone(); }
     });
 
-    // Mobile action buttons
     document.getElementById('btn-mobile-set-official').addEventListener('click', () => {
       saveActiveEdit();
       showConfirm('設為正式版', '確定要將此版本設為正式版？', () => {
@@ -1757,9 +1615,9 @@
           pd.status = 'draft';
           delete pd.confirmedAt;
           save(); syncToCloud();
-          updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
+          updateNavBadge(currentPageId);
           updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
-          updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
+          updateReviewBtn(pd.status);
           updateConfirmBtn(pd.status); updateConfirmOfficialLock(pd.status);
           updateMobileConfirmBtn(pd.status, pd.confirmedAt);
         });
@@ -1768,9 +1626,9 @@
           pd.status = 'confirmed';
           pd.confirmedAt = new Date().toLocaleString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
           save(); syncToCloud();
-          updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
+          updateNavBadge(currentPageId);
           updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
-          updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
+          updateReviewBtn(pd.status);
           updateConfirmBtn(pd.status, pd.confirmedAt); updateConfirmOfficialLock(pd.status);
           updateMobileConfirmBtn(pd.status, pd.confirmedAt);
         });
@@ -1779,7 +1637,6 @@
 
     document.getElementById('btn-mobile-add-sugg').addEventListener('click', openSuggestionModal);
 
-    // ── Suggestion modal ───────────────────────────────────────────────────────
     function renderSuggComments(pd) {
       const list = document.getElementById('sugg-comments-list');
       const comments = pd?.comments || [];
@@ -1847,7 +1704,6 @@
       document.getElementById('sugg-file').value = '';
     });
 
-    // Event delegation for edit / save / delete in comment list
     document.getElementById('sugg-comments-list').addEventListener('click', e => {
       const btn = e.target.closest('button');
       if (!btn) return;
@@ -1896,15 +1752,14 @@
         renderSuggComments(pd);
         document.getElementById('sugg-text').value = '';
         closeSuggestionModal();
-        updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
+        updateNavBadge(currentPageId);
         updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
         updateConfirmBtn(pd.status); updateConfirmOfficialLock(pd.status);
         updateMobileConfirmBtn(pd.status, pd.confirmedAt);
-        updateReviewBtn(pd.status); updateMobileReviewBtn(pd.status);
+        updateReviewBtn(pd.status);
       });
     });
 
-    // ── Drag-resize panels ─────────────────────────────────────────────────────
     (function() {
       const handle   = document.getElementById('drag-handle');
       const pV       = document.getElementById('panel-versions');
@@ -1940,11 +1795,9 @@
       });
     })();
 
-    // ── Save button ────────────────────────────────────────────────────────────
     async function triggerManualSave() {
       saveActiveEdit();
 
-      // Show saving state
       ['btn-save', 'btn-save-mobile'].forEach(id => {
         const btn = document.getElementById(id);
         if (!btn) return;
@@ -1987,7 +1840,6 @@
     document.getElementById('btn-save').addEventListener('click', triggerManualSave);
     document.getElementById('btn-save-mobile').addEventListener('click', triggerManualSave);
 
-    // ── Help modal ─────────────────────────────────────────────────────────────
     function openHelp() {
       document.getElementById('help-overlay').style.display = 'flex';
     }
@@ -2000,7 +1852,6 @@
     document.getElementById('btn-help-close').addEventListener('click', closeHelp);
     document.getElementById('help-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeHelp(); });
 
-    // Escape key closes confirm dialog and help modal
     document.addEventListener('keydown', e => {
       if (e.key !== 'Escape') return;
       if (document.getElementById('confirm-overlay').style.display === 'flex') {
@@ -2010,7 +1861,6 @@
       if (document.getElementById('help-overlay').style.display === 'flex') closeHelp();
     });
 
-    // ── Init ───────────────────────────────────────────────────────────────────
     (async () => {
       await loadStorage();
       buildNav();
