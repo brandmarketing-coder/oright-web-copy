@@ -65,6 +65,21 @@
     /* Badge */
     .badge-review    { display:inline-block; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:600; background:#fef3c7; color:#92400e; border:1px solid #fcd34d; margin-left:5px; }
     .badge-confirmed { display:inline-block; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:600; background:#d1fae5; color:#065f46; border:1px solid #6ee7b7; margin-left:5px; }
+    .badge-rejected  { display:inline-block; padding:1px 7px; border-radius:9px; font-size:10.5px; font-weight:600; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; margin-left:5px; }
+
+    /* Sitemap tree */
+    .sitemap-tree { font-size:12.5px; line-height:1.7; margin-bottom:18px; padding:16px 18px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; }
+    .sitemap-tree .st-root { font-weight:700; color:#1e3a5f; font-size:13px; }
+    .sitemap-tree .st-row { display:flex; align-items:baseline; gap:4px; padding:1px 0; }
+    .sitemap-tree .st-indent { display:inline-block; width:18px; flex-shrink:0; }
+    .sitemap-tree .st-line { color:#d1d5db; user-select:none; }
+    .sitemap-tree .st-label { color:#374151; }
+    .sitemap-tree .st-path { color:#94a3b8; font-size:11px; font-family:monospace; margin-left:3px; }
+    .sitemap-tree .st-tag { font-size:10px; padding:1px 5px; border-radius:4px; margin-left:3px; font-weight:500; }
+    .sitemap-tree .st-inner  { background:#eff6ff; color:#1d4ed8; }
+    .sitemap-tree .st-ext    { background:#f3f4f6; color:#6b7280; }
+    .sitemap-tree .st-modal  { background:#fdf4ff; color:#7e22ce; }
+    .sitemap-tree .st-dyn    { background:#fff7ed; color:#c2410c; }
 
     /* Markdown toggle button */
     .md-toggle-btn { width:26px; height:26px; border:1px solid #e2e8f0; border-radius:7px; background:#fff; color:#64748b; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s; }
@@ -197,6 +212,31 @@
 
       <!-- Site Map -->
       <div id="view-sitemap" style="display:none; flex:1; background:#fff; border-radius:12px; border:1px solid #e2e8f0; overflow-y:auto; padding:22px 26px;">
+        <!-- Architecture tree diagram -->
+        <div class="sitemap-tree">
+          <div class="st-row"><span class="st-root">O'right 官網架構圖</span></div>
+          <div style="margin-top:8px;">
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">首頁</span><span class="st-path">/</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">關於我們</span><span class="st-path">/about</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">永續美妝</span><span class="st-path">/sustainability</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">綠色產品</span><span class="st-path">/products</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">認證</span><span class="st-path">/certification</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">關鍵新聞</span><span class="st-path">/news</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-indent"></span><span class="st-line">└──</span><span class="st-label">新聞內頁</span><span class="st-path">/news/:id</span><span class="st-tag st-dyn">動態</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">已參訪國家</span><span class="st-path">/visited-countries</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">永續報告書</span><span class="st-path">/csr</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">環境教育參訪</span><span class="st-path">/visit</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">聯絡我們</span><span class="st-path">/contact</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">├──</span><span class="st-label">跨界合作</span><span class="st-path">/cooperation</span><span class="st-tag st-inner">內頁</span></div>
+            <div class="st-row"><span class="st-line">└──</span><span class="st-label">百貨體驗館</span><span class="st-path">/store</span><span class="st-tag st-inner">內頁</span></div>
+          </div>
+          <div style="margin-top:10px; padding-top:8px; border-top:1px solid #e2e8f0; display:flex; gap:8px; flex-wrap:wrap;">
+            <span class="st-tag st-inner">內頁</span><span style="font-size:11px;color:#6b7280;">本次重塑新建</span>
+            <span class="st-tag st-ext">外連</span><span style="font-size:11px;color:#6b7280;">第三方系統</span>
+            <span class="st-tag st-modal">彈窗</span><span style="font-size:11px;color:#6b7280;">Modal 覆蓋層</span>
+            <span class="st-tag st-dyn">動態</span><span style="font-size:11px;color:#6b7280;">依參數呈現</span>
+          </div>
+        </div>
         <div id="sitemap-content" class="prose"></div>
       </div>
 
@@ -265,9 +305,13 @@
             </div>
             <textarea id="official-md-textarea" class="md-textarea" spellcheck="false"></textarea>
           </div>
-          <div style="flex-shrink:0; border-top:1px solid #f1f5f9; padding:7px 12px; background:#f8fafc; display:flex; align-items:center; gap:6px;">
-            <div style="flex:1;"></div>
-            <button id="btn-confirm-official" class="act-btn-green">主管確認</button>
+          <div style="flex-shrink:0; border-top:1px solid #f1f5f9; padding:7px 12px; background:#f8fafc; display:flex; flex-direction:column; gap:3px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="flex:1;"></div>
+              <button id="btn-add-suggestion" class="act-btn" style="font-size:12px; padding:4px 10px;">新增建議</button>
+              <button id="btn-confirm-official" class="act-btn-green">主管確認</button>
+            </div>
+            <div id="confirm-timestamp" style="display:none; text-align:right; font-size:11px; color:#6b7280; padding-right:2px;"></div>
           </div>
         </div>
 
@@ -302,6 +346,28 @@
       <div style="display:flex; justify-content:flex-end; gap:8px;">
         <button id="btn-conf-cancel" class="act-btn">取消</button>
         <button id="btn-conf-ok" class="act-btn-primary">確認</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Suggestion Modal ────────────────────────────────────────────────── -->
+  <div id="suggestion-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:200; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width:420px; padding:22px 24px; box-shadow:0 20px 50px rgba(0,0,0,.25);">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+        <span style="font-size:15px; font-weight:700; color:#0f172a;">新增建議</span>
+        <button id="btn-sugg-close" style="width:28px; height:28px; border:none; background:#f1f5f9; color:#64748b; cursor:pointer; border-radius:7px; font-size:16px; display:flex; align-items:center; justify-content:center;">×</button>
+      </div>
+      <textarea id="sugg-text" placeholder="輸入建議內容…" style="width:100%; height:100px; border:1px solid #e2e8f0; border-radius:8px; padding:10px 12px; font-size:13px; line-height:1.55; resize:vertical; outline:none; box-sizing:border-box; font-family:inherit;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+      <div style="margin-top:10px;">
+        <label style="display:block; font-size:12px; color:#6b7280; margin-bottom:5px;">附件（圖片／影片，選填）</label>
+        <input id="sugg-file" type="file" accept="image/*,video/*" style="font-size:12px; color:#374151; width:100%;" />
+      </div>
+      <div style="margin-top:14px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <button id="btn-sugg-reject" style="padding:5px 13px; font-size:12.5px; border:1px solid #fca5a5; border-radius:8px; background:#fff; color:#991b1b; cursor:pointer; transition:background .12s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">駁回正式版</button>
+        <div style="display:flex; gap:8px;">
+          <button id="btn-sugg-cancel" class="act-btn">取消</button>
+          <button id="btn-sugg-submit" class="act-btn-primary">送出建議</button>
+        </div>
       </div>
     </div>
   </div>
@@ -524,6 +590,14 @@
       return storage.pages[id];
     }
 
+    // ── Version naming ─────────────────────────────────────────────────────────
+    function getVersionName(i) {
+      if (i === 1) return 'Readdy.AI';
+      if (i === 2) return 'AI版_v1';
+      if (i === 3) return 'AI版_v2';
+      return `AI版_v${i - 1}`;
+    }
+
     // ── Fetch ──────────────────────────────────────────────────────────────────
     async function fetchMd(file) {
       // Try same directory (GitHub Pages deploy), then parent directory (local dev)
@@ -655,6 +729,8 @@
         badge.className = 'badge-review'; badge.textContent = '待審查';
       } else if (pd.status === 'confirmed') {
         badge.className = 'badge-confirmed'; badge.textContent = '已確認';
+      } else if (pd.status === 'rejected') {
+        badge.className = 'badge-rejected'; badge.textContent = '已駁回';
       }
     }
 
@@ -712,7 +788,7 @@
         for (let i = 1; i <= vCount; i++) {
           try {
             const md = await fetchVersionMd(page.id, i);
-            versions.push({ name: `版本${i}`, content: marked.parse(md) });
+            versions.push({ name: getVersionName(i), content: marked.parse(md) });
           } catch { break; }
         }
         // Fallback to original .md if no version files found
@@ -739,7 +815,7 @@
           for (let i = pd.versions.length + 1; i <= vCount; i++) {
             try {
               const md = await fetchVersionMd(page.id, i);
-              pd.versions.push({ name: `版本${i}`, content: marked.parse(md) });
+              pd.versions.push({ name: getVersionName(i), content: marked.parse(md) });
             } catch { break; }
           }
           save();
@@ -751,7 +827,7 @@
       renderVersionContent(pd);
       renderOfficialContent(pd);
       updateStatusIndicator(pd.status);
-      updateConfirmBtn(pd.status);
+      updateConfirmBtn(pd.status, pd.confirmedAt);
       updateConfirmOfficialLock(pd.status);
       updateReviewBtn(pd.status);
       mobileActiveTab = -1;
@@ -795,7 +871,7 @@
         const p = getPage(currentPageId);
         if (!p) return;
         const src = p.versions[currentVersionIdx]?.content || '';
-        p.versions.push({ name: `版本${p.versions.length + 1}`, content: src });
+        p.versions.push({ name: getVersionName(p.versions.length + 1), content: src });
         currentVersionIdx = p.versions.length - 1;
         p.activeIdx = currentVersionIdx;
         save();
@@ -1176,16 +1252,27 @@
     });
 
     // ── Manager confirm ────────────────────────────────────────────────────────
-    function updateConfirmBtn(status) {
+    function updateConfirmBtn(status, confirmedAt) {
       const btn = document.getElementById('btn-confirm-official');
+      const ts  = document.getElementById('confirm-timestamp');
       if (status === 'confirmed') {
         btn.textContent = '已確認 ✓';
         btn.style.background = '#6b7280';
         btn.title = '點擊取消確認';
+        if (ts && confirmedAt) {
+          ts.style.display = 'block';
+          ts.textContent = `審核時間：${confirmedAt}`;
+        }
+      } else if (status === 'rejected') {
+        btn.textContent = '主管確認';
+        btn.style.background = '';
+        btn.title = '';
+        if (ts) ts.style.display = 'none';
       } else {
         btn.textContent = '主管確認';
         btn.style.background = '';
         btn.title = '';
+        if (ts) ts.style.display = 'none';
       }
     }
 
@@ -1206,6 +1293,7 @@
       if (pd.status === 'confirmed') {
         showConfirm('取消確認', '正式版文案已確認。確定要取消確認嗎？取消後可重新編輯。', () => {
           pd.status = 'draft';
+          delete pd.confirmedAt;
           save();
           syncToCloud();
           updateNavBadge(currentPageId);
@@ -1216,11 +1304,12 @@
       } else {
         showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」，正式版將鎖定不可編輯。', () => {
           pd.status = 'confirmed';
+          pd.confirmedAt = new Date().toLocaleString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
           save();
           syncToCloud();
           updateNavBadge(currentPageId);
           updateStatusIndicator(pd.status);
-          updateConfirmBtn(pd.status);
+          updateConfirmBtn(pd.status, pd.confirmedAt);
           updateConfirmOfficialLock(pd.status);
         });
       }
@@ -1239,6 +1328,10 @@
         el.style.display = 'inline-block';
         el.className = 'badge-confirmed';
         el.textContent = '已確認';
+      } else if (status === 'rejected') {
+        el.style.display = 'inline-block';
+        el.className = 'badge-rejected';
+        el.textContent = '已駁回';
       }
     }
 
@@ -1395,6 +1488,7 @@
       if (!pd) return;
       if (pd.status === 'review')     { badge.className = 'badge-review'; badge.textContent = '待審查'; }
       else if (pd.status === 'confirmed') { badge.className = 'badge-confirmed'; badge.textContent = '已確認'; }
+      else if (pd.status === 'rejected')  { badge.className = 'badge-rejected';  badge.textContent = '已駁回'; }
     }
 
     function openMobileDrawer() {
@@ -1552,6 +1646,7 @@
       el.textContent = ''; el.className = '';
       if (status === 'review')     { el.className = 'badge-review'; el.textContent = '待審查'; }
       else if (status === 'confirmed') { el.className = 'badge-confirmed'; el.textContent = '已確認'; }
+      else if (status === 'rejected')  { el.className = 'badge-rejected';  el.textContent = '已駁回'; }
     }
 
     // Mobile inline editing
@@ -1604,6 +1699,7 @@
       if (pd.status === 'confirmed') {
         showConfirm('取消確認', '正式版文案已確認。確定要取消確認嗎？', () => {
           pd.status = 'draft';
+          delete pd.confirmedAt;
           save(); syncToCloud();
           updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
           updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
@@ -1614,11 +1710,12 @@
       } else {
         showConfirm('主管確認', '確定要確認此正式版文案？狀態將更新為「已確認」。', () => {
           pd.status = 'confirmed';
+          pd.confirmedAt = new Date().toLocaleString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
           save(); syncToCloud();
           updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
           updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
           updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
-          updateConfirmBtn(pd.status); updateConfirmOfficialLock(pd.status);
+          updateConfirmBtn(pd.status, pd.confirmedAt); updateConfirmOfficialLock(pd.status);
           updateMobileConfirmBtn(pd.status);
         });
       }
@@ -1643,6 +1740,68 @@
           updateMobileReviewBtn(pd.status); updateReviewBtn(pd.status);
         });
       }
+    });
+
+    // ── Suggestion modal ───────────────────────────────────────────────────────
+    function openSuggestionModal() {
+      document.getElementById('sugg-text').value = '';
+      document.getElementById('sugg-file').value = '';
+      document.getElementById('suggestion-overlay').style.display = 'flex';
+    }
+    function closeSuggestionModal() {
+      document.getElementById('suggestion-overlay').style.display = 'none';
+    }
+
+    document.getElementById('btn-add-suggestion').addEventListener('click', openSuggestionModal);
+    document.getElementById('btn-sugg-close').addEventListener('click', closeSuggestionModal);
+    document.getElementById('btn-sugg-cancel').addEventListener('click', closeSuggestionModal);
+    document.getElementById('suggestion-overlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeSuggestionModal();
+    });
+
+    document.getElementById('btn-sugg-submit').addEventListener('click', async () => {
+      const text = document.getElementById('sugg-text').value.trim();
+      if (!text) { alert('請輸入建議內容'); return; }
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      const ts = new Date().toLocaleString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+      // Handle file attachment (read as base64)
+      const fileInput = document.getElementById('sugg-file');
+      let attachment = null;
+      if (fileInput.files && fileInput.files[0]) {
+        attachment = await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = e => resolve({ name: fileInput.files[0].name, type: fileInput.files[0].type, data: e.target.result });
+          reader.readAsDataURL(fileInput.files[0]);
+        });
+      }
+      if (!pd.comments) pd.comments = [];
+      pd.comments.push({ text, ts, attachment: attachment ? { name: attachment.name, type: attachment.type } : null });
+      save();
+      syncToCloud();
+      closeSuggestionModal();
+      alert(`建議已記錄（${ts}）`);
+    });
+
+    document.getElementById('btn-sugg-reject').addEventListener('click', () => {
+      closeSuggestionModal();
+      const pd = getPage(currentPageId);
+      if (!pd) return;
+      showConfirm('駁回正式版', '確定要駁回？狀態將更新為「已駁回」，需重新送審。此操作無法直接回復。', () => {
+        const text = document.getElementById('sugg-text').value.trim();
+        const ts = new Date().toLocaleString('zh-TW', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+        if (!pd.comments) pd.comments = [];
+        if (text) pd.comments.push({ text: `[駁回] ${text}`, ts });
+        pd.status = 'rejected';
+        delete pd.confirmedAt;
+        save();
+        syncToCloud();
+        updateNavBadge(currentPageId); updateMobileNavBadge(currentPageId);
+        updateStatusIndicator(pd.status); updateMobileStatusBadge(pd.status);
+        updateConfirmBtn(pd.status); updateConfirmOfficialLock(pd.status);
+        updateMobileConfirmBtn(pd.status);
+        updateReviewBtn(pd.status); updateMobileReviewBtn(pd.status);
+      });
     });
 
     // ── Drag-resize panels ─────────────────────────────────────────────────────
