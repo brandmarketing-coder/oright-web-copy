@@ -812,6 +812,15 @@
           }
           save();
         }
+        // Always re-fetch official.md so file changes (e.g. new labels) are reflected immediately
+        try {
+          let or = await fetch(`versions/${page.id}/official.md`);
+          if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
+          if (or.ok) {
+            pd.official = marked.parse(await or.text());
+            save();
+          }
+        } catch {}
       }
       currentVersionIdx = 0;
       currentSectionAnchor = null;   // reset on page switch
