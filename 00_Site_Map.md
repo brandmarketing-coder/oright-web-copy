@@ -19,37 +19,36 @@
 ## 頁面架構總覽
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
 .sm-wrap{padding:16px 0 24px}
-.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;font-size:12px;color:var(--color-text-secondary)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;font-size:12px;color:#6b7280}
 .leg{display:flex;align-items:center;gap:6px}
 .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .page-tree{display:flex;flex-direction:column;gap:6px}
-.page-group{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.page-group{border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;background:#fff}
 .page-header{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;transition:background .15s}
-.page-header:hover{background:var(--color-background-secondary)}
+.page-header:hover{background:#f9fafb}
 .page-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.page-title{font-size:14px;font-weight:500;color:var(--color-text-primary);flex:1}
-.page-route{font-size:12px;color:var(--color-text-tertiary);font-family:var(--font-mono)}
-.page-ext{font-size:11px;padding:2px 7px;border-radius:4px;background:var(--color-background-warning);color:var(--color-text-warning);flex-shrink:0}
-.chevron{width:16px;height:16px;flex-shrink:0;transition:transform .2s;color:var(--color-text-tertiary)}
+.page-title{font-size:14px;font-weight:500;color:#111827;flex:1}
+.page-route{font-size:12px;color:#9ca3af;font-family:ui-monospace,monospace}
+.page-ext{font-size:11px;padding:2px 7px;border-radius:4px;background:#fef3c7;color:#92400e;flex-shrink:0}
+.chevron{width:16px;height:16px;flex-shrink:0;transition:transform .2s;color:#9ca3af}
 .chevron.open{transform:rotate(90deg)}
-.page-body{border-top:0.5px solid var(--color-border-tertiary);padding:10px 14px 12px 34px;display:none;flex-direction:column;gap:4px}
+.page-body{border-top:1px solid #f3f4f6;padding:10px 14px 12px 34px;display:none;flex-direction:column;gap:2px}
 .page-body.open{display:flex}
 .section{display:flex;align-items:flex-start;gap:8px;padding:5px 8px;border-radius:6px}
-.section:hover{background:var(--color-background-secondary)}
+.section:hover{background:#f9fafb}
 .section.indent{padding-left:20px}
-.sec-bullet{width:5px;height:5px;border-radius:50%;background:var(--color-border-secondary);margin-top:6px;flex-shrink:0}
-.sec-bullet.sub{width:4px;height:4px;background:var(--color-border-tertiary);margin-top:7px}
-.sec-name{font-size:13px;color:var(--color-text-primary)}
-.sec-name.sub{font-size:12px;color:var(--color-text-secondary)}
-.sec-links{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-.cta-pill{font-size:11px;padding:2px 8px;border-radius:10px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);white-space:nowrap}
-.cta-pill.ext{border-color:var(--color-border-warning);color:var(--color-text-warning)}
+.sec-bullet{width:5px;height:5px;border-radius:50%;background:#d1d5db;margin-top:6px;flex-shrink:0}
+.sec-bullet.sub{width:4px;height:4px;background:#e5e7eb;margin-top:7px}
+.sec-name{font-size:13px;color:#374151}
+.sec-name.sub{font-size:12px;color:#6b7280}
+.sec-links{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.cta-pill{font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid #d1d5db;color:#6b7280;white-space:nowrap;background:#fff}
+.cta-pill.ext{border-color:#f59e0b;color:#b45309;background:#fffbeb}
 .sec-group{display:flex;flex-direction:column;gap:1px;flex:1}
-.tier-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);padding:8px 0 4px;letter-spacing:.04em}
-.divider{height:0.5px;background:var(--color-border-tertiary);margin:8px 0}
-.url-link{font-size:12px;color:var(--color-text-info);font-family:var(--font-mono);word-break:break-all;padding:6px 8px;background:var(--color-background-secondary);border-radius:6px;margin-top:4px}
+.tier-label{font-size:11px;font-weight:600;color:#9ca3af;padding:8px 0 4px;letter-spacing:.06em;text-transform:uppercase}
+.divider{height:1px;background:#f3f4f6;margin:8px 0}
+.url-link{font-size:12px;color:#2563eb;font-family:ui-monospace,monospace;word-break:break-all;padding:6px 8px;background:#eff6ff;border-radius:6px;margin-top:4px}
 </style>
 
 <div class="sm-wrap">
