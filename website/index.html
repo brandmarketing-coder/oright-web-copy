@@ -416,7 +416,7 @@
 
     const PAGES = [
       { id: 'sitemap',        name: 'Site Map',      file: '00_Site_Map.md',        isSiteMap: true },
-      { id: '01_首頁',         name: '首頁',           file: '01_首頁.md',             route: '/',                   versionCount: 1 },
+      { id: '01_首頁',         name: '首頁',           file: '01_首頁.md',             route: '/',                   versionCount: 1,  contentVersion: 2 },
       { id: '02_關於我們',     name: '關於我們',       file: '02_關於我們.md',         route: '/about',              versionCount: 3 },
       { id: '03_綠色產品',     name: '綠色產品',       file: '03_綠色產品.md',         route: '/products',           versionCount: 3 },
       { id: '04_永續美妝',     name: '永續美妝',       file: '04_永續美妝.md',         route: '/sustainability',     versionCount: 1 },
@@ -723,6 +723,11 @@
 
     async function loadCopyPage(page) {
       let pd = getPage(page.id);
+      // 若 contentVersion 有更新，清除快取強制重新載入 .md 檔
+      if (pd && page.contentVersion && pd.contentVersion !== page.contentVersion) {
+        delete storage.pages[page.id];
+        pd = null;
+      }
       if (!pd || !pd.versions || pd.versions.length === 0) {
         const existingStatus    = pd?.status    || 'draft';
         const existingActiveIdx = pd?.activeIdx || 0;
@@ -752,7 +757,7 @@
           if (!or2.ok) or2 = await fetch(`../versions/${page.id}/original.md`);
           if (or2.ok) originalContent = marked.parse(await or2.text());
         } catch {}
-        pd = { versions, official: officialContent, original: originalContent, activeIdx: existingActiveIdx, status: existingStatus, loadedVersionCount: versions.length };
+        pd = { versions, official: officialContent, original: originalContent, activeIdx: existingActiveIdx, status: existingStatus, loadedVersionCount: versions.length, contentVersion: page.contentVersion ?? 1 };
         storage.pages[page.id] = pd;
         saveQuiet();
       } else {
