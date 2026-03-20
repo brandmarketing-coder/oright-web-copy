@@ -16,6 +16,268 @@
 
 ---
 
+## 頁面架構總覽
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.sm-wrap{padding:16px 0 24px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;font-size:12px;color:var(--color-text-secondary)}
+.leg{display:flex;align-items:center;gap:6px}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.page-tree{display:flex;flex-direction:column;gap:6px}
+.page-group{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.page-header{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;transition:background .15s}
+.page-header:hover{background:var(--color-background-secondary)}
+.page-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.page-title{font-size:14px;font-weight:500;color:var(--color-text-primary);flex:1}
+.page-route{font-size:12px;color:var(--color-text-tertiary);font-family:var(--font-mono)}
+.page-ext{font-size:11px;padding:2px 7px;border-radius:4px;background:var(--color-background-warning);color:var(--color-text-warning);flex-shrink:0}
+.chevron{width:16px;height:16px;flex-shrink:0;transition:transform .2s;color:var(--color-text-tertiary)}
+.chevron.open{transform:rotate(90deg)}
+.page-body{border-top:0.5px solid var(--color-border-tertiary);padding:10px 14px 12px 34px;display:none;flex-direction:column;gap:4px}
+.page-body.open{display:flex}
+.section{display:flex;align-items:flex-start;gap:8px;padding:5px 8px;border-radius:6px}
+.section:hover{background:var(--color-background-secondary)}
+.section.indent{padding-left:20px}
+.sec-bullet{width:5px;height:5px;border-radius:50%;background:var(--color-border-secondary);margin-top:6px;flex-shrink:0}
+.sec-bullet.sub{width:4px;height:4px;background:var(--color-border-tertiary);margin-top:7px}
+.sec-name{font-size:13px;color:var(--color-text-primary)}
+.sec-name.sub{font-size:12px;color:var(--color-text-secondary)}
+.sec-links{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.cta-pill{font-size:11px;padding:2px 8px;border-radius:10px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);white-space:nowrap}
+.cta-pill.ext{border-color:var(--color-border-warning);color:var(--color-text-warning)}
+.sec-group{display:flex;flex-direction:column;gap:1px;flex:1}
+.tier-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);padding:8px 0 4px;letter-spacing:.04em}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:8px 0}
+.url-link{font-size:12px;color:var(--color-text-info);font-family:var(--font-mono);word-break:break-all;padding:6px 8px;background:var(--color-background-secondary);border-radius:6px;margin-top:4px}
+</style>
+
+<div class="sm-wrap">
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#7F77DD"></div>主要頁面</div>
+  <div class="leg"><div class="leg-dot" style="background:#1D9E75"></div>延伸頁面</div>
+  <div class="leg"><div class="leg-dot" style="background:#D85A30"></div>動態路由</div>
+  <div class="leg"><div class="leg-dot" style="background:#BA7517"></div>外部連結</div>
+</div>
+<div class="page-tree" id="tree"></div>
+</div>
+
+<script>
+const pages = [
+  {
+    title:"首頁", route:"/", color:"#7F77DD", label:"main",
+    sections:[
+      {name:"Hero", links:[{t:"探索產品→/products"},{t:"了解更多→/about"}]},
+      {name:"品牌故事 Our Story", links:[{t:"了解品牌故事→/about"}]},
+      {name:"永續數據 Tabs", links:[{t:"參訪國家數→/visited-countries"},{t:"完整永續報告→/sustainability"}]},
+      {name:"綠色產品系列", links:[{t:"[彈窗] 產品詳情",e:true},{t:"查看全部→/products"}]},
+      {name:"影音故事 Brand Film", links:[{t:"[彈窗] 影片播放",e:true}]},
+      {name:"最新消息", links:[{t:"新聞卡片→/news/:id"},{t:"查看全部→/news"}]},
+      {name:"CTA 結尾區", links:[{t:"了解更多→/about"},{t:"探索產品→/products"}]},
+    ]
+  },
+  {
+    title:"關於我們", route:"/about", color:"#7F77DD", label:"main",
+    sections:[
+      {name:"Hero"},
+      {name:"氣候數據 Climate Emergency"},
+      {name:"GDP → GEP Paradigm Shift"},
+      {name:"可驗證行動 Verified Actions"},
+      {name:"±R 計畫 Zero-Carbon Living"},
+      {name:"創辦人", links:[{t:"創辦人專欄→/news?category=founder"}]},
+      {name:"品牌時間軸 Our Journey"},
+      {name:"CTA 結尾區", links:[{t:"探索產品→/products"},{t:"查看永續美妝→/sustainability"}]},
+    ]
+  },
+  {
+    title:"綠色產品", route:"/products", color:"#7F77DD", label:"main",
+    sections:[
+      {name:"Hero"},
+      {name:"分類篩選列", links:[{t:"全部"},{t:"明星產品"},{t:"髮絲養護"},{t:"臉部保養"},{t:"美體保養"}]},
+      {name:"分類說明區（選擇後顯示）", links:[{t:"前往官方商店",e:true}]},
+      {name:"產品格狀列表", links:[{t:"[彈窗] 產品詳情",e:true}]},
+      {name:"CTA 結尾區", links:[{t:"了解品牌理念→/about"},{t:"查看永續數據→/sustainability"}]},
+    ]
+  },
+  {
+    title:"永續美妝", route:"/sustainability", color:"#7F77DD", label:"main",
+    sections:[
+      {name:"Hero"},
+      {name:"數據條"},
+      {name:"獲獎數據摘要 Tabs", links:[{t:"Tab：國際設計大獎"},{t:"Tab：永續美妝建築"},{t:"Tab：ESG 企業責任"}]},
+      {name:"16 Free"},
+      {name:"TF 實驗室"},
+      {name:"綠建築"},
+      {name:"氣候行動"},
+      {name:"解凍格陵蘭", sub:true},
+      {name:"地球一小時", sub:true},
+      {name:"RE100 / 碳權"},
+      {name:"INCI 命名權"},
+      {name:"永續行動影片", links:[{t:"播放鈕→[彈窗] 影片播放",e:true}]},
+      {name:"CTA 結尾區", links:[{t:"了解我們的故事→/about"},{t:"探索獲獎產品→/products"}]},
+    ]
+  },
+  {
+    title:"認證", route:"/certification", color:"#7F77DD", label:"main",
+    sections:[
+      {name:"Hero"},
+      {name:"GMP"},
+      {name:"ISO 認證"},
+      {name:"碳中和 / 碳標籤"},
+      {name:"USDA"},
+      {name:"實驗室認證"},
+      {name:"CTA 結尾區", links:[{t:"探索認證產品→/products"},{t:"查看永續數據→/sustainability"}]},
+    ]
+  },
+  {
+    title:"關鍵新聞", route:"/news", color:"#7F77DD", label:"main",
+    sections:[
+      {name:"Hero"},
+      {name:"分類篩選列", links:[{t:"全部"},{t:"最新消息"},{t:"創辦人專欄"},{t:"暢銷書"},{t:"經典問答"}]},
+      {name:"精選新聞（大卡）", links:[{t:"→/news/:id"}]},
+      {name:"一般新聞卡片", links:[{t:"→/news/:id"}]},
+      {name:"載入更多 View Archive"},
+      {name:"電子報訂閱表單"},
+    ]
+  },
+  {
+    title:"新聞內頁", route:"/news/:id", color:"#D85A30", label:"dynamic",
+    sections:[
+      {name:"返回消息列表", links:[{t:"→/news"}]},
+      {name:"文章主體", links:[{t:"分類標籤"},{t:"標題、日期"},{t:"主視覺圖"},{t:"正文段落"}]},
+      {name:"延伸閱讀（3則）", links:[{t:"→/news/:id"}]},
+      {name:"側欄：實證數據卡", links:[{t:"數據指標"},{t:"對應 SDGs"},{t:"認證標章"}]},
+      {name:"側欄：產品 CTA 卡", links:[{t:"→/products"}]},
+    ]
+  },
+  {
+    title:"已參訪國家", route:"/visited-countries", color:"#7F77DD", label:"main",
+    sections:[
+      {name:"Hero（國家數/大洲/年份）"},
+      {name:"全球參訪紀實（影片）", links:[{t:"[彈窗] 影片播放",e:true}]},
+      {name:"各洲參訪統計"},
+      {name:"參訪國家列表", links:[{t:"區域篩選列"},{t:"國家卡片 hover"}]},
+      {name:"CTA 結尾區", links:[{t:"預約參訪→/visit"},{t:"了解品牌→/about"}]},
+    ]
+  },
+  {
+    title:"永續報告書", route:"/csr", color:"#1D9E75", label:"ext",
+    sections:[
+      {name:"Hero"},
+      {name:"雙報告介紹", links:[{t:"企業永續報告書（GRI）"},{t:"氣候暨自然報告書（TNFD）"}]},
+      {name:"TNFD 先行者宣言 Spotlight"},
+      {name:"報告下載中心", links:[{t:"企業永續報告 2013–2024"},{t:"氣候暨自然報告 TNFD"},{t:"下載 PDF",e:true}]},
+      {name:"揭露框架", links:[{t:"TNFD"},{t:"TCFD"},{t:"SBTi"},{t:"GRI"},{t:"ISO 14068-1"}]},
+      {name:"CTA 結尾區", links:[{t:"下載最新報告書",e:true},{t:"查看認證清單→/certification"}]},
+    ]
+  },
+  {
+    title:"環境教育參訪", route:"/visit", color:"#1D9E75", label:"ext",
+    sections:[
+      {name:"Hero（91國/+23%/政府認證/免費）"},
+      {name:"場域亮點 Venue Highlights"},
+      {name:"申請資訊 Visit Info"},
+      {name:"活動方案輪播", links:[{t:"綠色之旅"},{t:"資源循環"},{t:"ESG 企業"}]},
+      {name:"預約申請 Contact CTA", links:[{t:"電話"},{t:"E-mail"},{t:"LINE"}]},
+      {name:"預約流程", links:[{t:"預約報名"},{t:"主動聯繫"},{t:"審核"},{t:"完成預約"},{t:"活動當天"}]},
+      {name:"交通路線", links:[{t:"Google 地圖",e:true}]},
+      {name:"CTA 結尾區", links:[{t:"立即預約→#contact-cta"},{t:"查看已參訪國家→/visited-countries"}]},
+    ]
+  },
+  {
+    title:"人才招募", route:"[外連 104]", color:"#BA7517", label:"external", ext:true,
+    url:"https://www.104.com.tw/company/5x6ndog?jobsource=ref_perplexity"
+  },
+  {
+    title:"聯絡我們", route:"/contact", color:"#1D9E75", label:"ext",
+    sections:[
+      {name:"公司資訊（左欄）", links:[{t:"Google 地圖",e:true}]},
+      {name:"聯絡表單（右欄）", links:[{t:"姓名/稱謂"},{t:"聯絡電話"},{t:"所在地區"},{t:"電子郵件"},{t:"諮詢類型（10項）"},{t:"意見分享"},{t:"CAPTCHA"},{t:"確認送出→[表單 API]"}]},
+    ]
+  },
+  {
+    title:"跨界合作", route:"/cooperation", color:"#1D9E75", label:"ext",
+    sections:[
+      {name:"Hero"},
+      {name:"全家便利商店"},
+      {name:"薰衣草森林"},
+      {name:"家樂福"},
+      {name:"IHG 洲際飯店集團"},
+      {name:"送禮成績展示"},
+      {name:"CTA 結尾區", links:[{t:"聯絡我們→/contact"},{t:"了解品牌理念→/about"}]},
+    ]
+  },
+  {
+    title:"百貨體驗館", route:"/store", color:"#1D9E75", label:"ext",
+    sections:[
+      {name:"Hero"},
+      {name:"門市列表（兩層篩選）", links:[{t:"台灣（26店）"},{t:"中國·上海"},{t:"日本·東京/大阪/京都"}]},
+      {name:"門市圖卡", links:[{t:"Google Maps",e:true}]},
+      {name:"體驗館特色（AI 六維頭皮檢測）"},
+      {name:"CTA 結尾區", links:[{t:"查看門市地圖→#store-locator"},{t:"了解產品系列→/products"}]},
+    ]
+  },
+];
+
+function chevronSVG(open){
+  return `<svg class="chevron${open?' open':''}" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function renderPage(p,i){
+  const id='pg'+i;
+  const isExt=p.label==='external';
+  const hasSections=p.sections&&p.sections.length>0;
+  const bodyContent = p.url
+    ? `<div class="url-link"><a href="${p.url}" style="color:var(--color-text-info);text-decoration:none">${p.url}</a></div>`
+    : (hasSections ? p.sections.map(s=>`
+    <div class="section${s.sub?' indent':''}">
+      <div class="sec-bullet${s.sub?' sub':''}"></div>
+      <div class="sec-group">
+        <div class="sec-name${s.sub?' sub':''}">${s.name}</div>
+        ${s.links&&s.links.length?`<div class="sec-links">${s.links.map(l=>`<span class="cta-pill${l.e?' ext':''}">${l.t}</span>`).join('')}</div>`:''}
+      </div>
+    </div>`).join('') : '');
+
+  return `<div class="page-group">
+  <div class="page-header" onclick="toggle('${id}')">
+    <div class="page-dot" style="background:${p.color}"></div>
+    <span class="page-title">${p.title}</span>
+    <span class="page-route">${p.route}</span>
+    ${isExt?`<span class="page-ext">外連</span>`:''}
+    <div id="${id}-chev">${chevronSVG(false)}</div>
+  </div>
+  <div class="page-body" id="${id}" style="padding-left:${p.url?'14px':'34px'}">
+    ${bodyContent}
+  </div>
+</div>`;
+}
+
+const tree=document.getElementById('tree');
+const mainLabel=document.createElement('div');
+mainLabel.className='tier-label';
+mainLabel.textContent='主要頁面 — Main Pages';
+tree.appendChild(mainLabel);
+pages.filter(p=>['main','dynamic'].includes(p.label)).forEach((p,i)=>tree.insertAdjacentHTML('beforeend',renderPage(p,i)));
+const div=document.createElement('div');
+div.className='divider';
+tree.appendChild(div);
+const extLabel=document.createElement('div');
+extLabel.className='tier-label';
+extLabel.textContent='延伸頁面 — Extended Pages';
+tree.appendChild(extLabel);
+pages.filter(p=>['ext','external'].includes(p.label)).forEach((p,i)=>tree.insertAdjacentHTML('beforeend',renderPage(p,i+20)));
+
+function toggle(id){
+  const body=document.getElementById(id);
+  const chev=document.getElementById(id+'-chev');
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  chev.querySelector('.chevron').classList.toggle('open',!isOpen);
+}
+</script>
+
+---
+
 ## 一、全域導覽（Global Navigation）
 
 ### 1-1 Navbar

@@ -709,7 +709,13 @@
       let content;
       try { content = await fetchMd(page.file); }
       catch { content = '> **載入失敗**：請透過 HTTP 伺服器開啟此頁（GitHub Pages 或 `python -m http.server`）。'; }
-      document.getElementById('sitemap-content').innerHTML = marked.parse(content);
+      const smEl = document.getElementById('sitemap-content');
+      smEl.innerHTML = marked.parse(content);
+      smEl.querySelectorAll('script').forEach(old => {
+        const s = document.createElement('script');
+        s.textContent = old.textContent;
+        old.replaceWith(s);
+      });
       updateStatusIndicator('');
       updateMobileStatusBadge('');
       showView('sitemap');
