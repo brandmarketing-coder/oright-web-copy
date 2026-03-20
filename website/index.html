@@ -746,25 +746,27 @@
           if (!or2.ok) or2 = await fetch(`../versions/${page.id}/original.md`);
           if (or2.ok) originalContent = marked.parse(await or2.text());
         } catch {}
-        pd = { versions, official: officialContent, original: originalContent, activeIdx: existingActiveIdx, status: existingStatus };
+        pd = { versions, official: officialContent, original: originalContent, activeIdx: existingActiveIdx, status: existingStatus, loadedVersionCount: versions.length };
         storage.pages[page.id] = pd;
-        save();
+        saveQuiet();
       } else {
         const vCount = page.versionCount || 1;
-        if (pd.versions.length < vCount) {
-          for (let i = pd.versions.length + 1; i <= vCount; i++) {
+        const loaded = pd.loadedVersionCount ?? pd.versions.length;
+        if (vCount > loaded) {
+          for (let i = loaded + 1; i <= vCount; i++) {
             try {
               const md = await fetchVersionMd(page.id, i);
               pd.versions.push({ name: getVersionName(i), content: marked.parse(md) });
             } catch { break; }
           }
-          save();
+          pd.loadedVersionCount = vCount;
+          saveQuiet();
         }
         if (pd.official == null) {
           try {
             let or = await fetch(`versions/${page.id}/official.md`);
             if (!or.ok) or = await fetch(`../versions/${page.id}/official.md`);
-            if (or.ok) { pd.official = marked.parse(await or.text()); save(); }
+            if (or.ok) { pd.official = marked.parse(await or.text()); saveQuiet(); }
           } catch {}
         }
         try {
