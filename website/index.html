@@ -1010,6 +1010,9 @@
       const pd = getPage(currentPageId);
       if (!pd || pd.versions.length <= 1) return;
       pd.versions.splice(idx, 1);
+      // 同步修正 loadedVersionCount，並重新排序版本名稱
+      if (pd.loadedVersionCount > pd.versions.length) pd.loadedVersionCount = pd.versions.length;
+      pd.versions.forEach((v, i) => { v.name = getVersionName(i + 1); });
       if (currentVersionIdx >= pd.versions.length) currentVersionIdx = pd.versions.length - 1;
       pd.activeIdx = currentVersionIdx;
       save();
@@ -1068,6 +1071,14 @@
       if (!pd) return;
       if (which === 'version') {
         pd.versions[currentVersionIdx].content = cleanHtml;
+        if (diffMode && pd.official) {
+          const el = document.getElementById('version-rendered');
+          el.innerHTML = buildDiffHtml(cleanHtml, pd.official);
+          adjustTableLayouts(el);
+          const badge = el.querySelectorAll('[style*="fef9c3"]').length;
+          const diffBtn = document.getElementById('btn-diff');
+          if (diffBtn) diffBtn.dataset.badge = badge > 0 ? badge : '';
+        }
       } else {
         pd.official = cleanHtml;
         if (diffMode) renderVersionContent(pd);
