@@ -541,7 +541,7 @@
     function migrateVersionNames(pd) {
       if (!pd?.versions) return;
       pd.versions.forEach((v, i) => {
-        if (/^版本\d+$/.test(v.name)) {
+        if (/^版本\d+$/.test(v.name) || v.name === 'Readdy.AI' || /^AI版_v\d+$/.test(v.name)) {
           v.name = getVersionName(i + 1);
         }
       });
@@ -768,6 +768,14 @@
             } catch { break; }
           }
           pd.loadedVersionCount = vCount;
+          saveQuiet();
+        } else if (vCount < loaded) {
+          // 檔案版本數減少時，移除多餘的檔案載入版本，保留使用者手動新增的版本
+          const userAdded = pd.versions.slice(loaded);
+          pd.versions = [...pd.versions.slice(0, vCount), ...userAdded];
+          pd.loadedVersionCount = vCount;
+          pd.versions.forEach((v, i) => { v.name = getVersionName(i + 1); });
+          if (pd.activeIdx >= pd.versions.length) pd.activeIdx = pd.versions.length - 1;
           saveQuiet();
         }
         if (pd.official == null) {
