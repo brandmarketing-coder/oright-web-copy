@@ -342,8 +342,8 @@
           <div class="help-title">📑 版本管理</div>
           <ul class="help-list">
             <li><strong>原版</strong>：第一個 tab，顯示改版前官網原始文案（唯讀）</li>
-            <li><strong>Readdy.AI</strong>：第一個 AI 生成版本</li>
-            <li><strong>AI版_v1 / AI版_v2…</strong>：後續新增版本依序命名</li>
+            <li><strong>AI_v1</strong>：第一個 AI 生成版本</li>
+            <li><strong>AI_v2 / AI_v3…</strong>：後續新增版本依序命名</li>
             <li>點 <strong>＋</strong> 新增版本，點垃圾桶刪除目前版本</li>
             <li>點擊版本 tab 下方的區塊標題可快速跳至對應段落</li>
           </ul>
@@ -417,18 +417,18 @@
     const PAGES = [
       { id: 'sitemap',        name: 'Site Map',      file: '00_Site_Map.md',        isSiteMap: true },
       { id: '01_首頁',         name: '首頁',           file: '01_首頁.md',             route: '/',                   versionCount: 1,  contentVersion: 2 },
-      { id: '02_關於我們',     name: '關於我們',       file: '02_關於我們.md',         route: '/about',              versionCount: 3 },
-      { id: '03_綠色產品',     name: '綠色產品',       file: '03_綠色產品.md',         route: '/products',           versionCount: 3 },
+      { id: '02_關於我們',     name: '關於我們',       file: '02_關於我們.md',         route: '/about',              versionCount: 1 },
+      { id: '03_綠色產品',     name: '綠色產品',       file: '03_綠色產品.md',         route: '/products',           versionCount: 1 },
       { id: '04_永續美妝',     name: '永續美妝',       file: '04_永續美妝.md',         route: '/sustainability',     versionCount: 1 },
       { id: '05_認證',         name: '認證',           file: '05_認證.md',             route: '/certification',      versionCount: 1 },
       { id: '06_最新消息',     name: '關鍵新聞',       file: '06_最新消息.md',         route: '/news',               versionCount: 1 },
       { id: '07_新聞內頁',     name: '新聞內頁',       file: '07_新聞內頁.md',         route: '/news/:id',           versionCount: 1 },
-      { id: '08_已參訪國家',   name: '已參訪國家',     file: '08_已參訪國家.md',       route: '/visited-countries',  versionCount: 3 },
-      { id: '09_永續報告書',   name: '永續報告書',     file: '09_永續報告書.md',       route: '/csr',                versionCount: 3 },
-      { id: '10_環境教育參訪', name: '環境教育參訪',   file: '10_環境教育參訪.md',     route: '/visit',              versionCount: 3 },
+      { id: '08_已參訪國家',   name: '已參訪國家',     file: '08_已參訪國家.md',       route: '/visited-countries',  versionCount: 1 },
+      { id: '09_永續報告書',   name: '永續報告書',     file: '09_永續報告書.md',       route: '/csr',                versionCount: 1 },
+      { id: '10_環境教育參訪', name: '環境教育參訪',   file: '10_環境教育參訪.md',     route: '/visit',              versionCount: 1 },
       { id: '12_聯絡我們',     name: '聯絡我們',       file: '12_聯絡我們.md',         route: '/contact',            versionCount: 1 },
       { id: '13_跨界合作',     name: '跨界合作',       file: '13_跨界合作.md',         route: '/cooperation',        versionCount: 1 },
-      { id: '14_百貨體驗館',   name: '百貨體驗館',     file: '14_百貨體驗館.md',       route: '/store',              versionCount: 3 },
+      { id: '14_百貨體驗館',   name: '百貨體驗館',     file: '14_百貨體驗館.md',       route: '/store',              versionCount: 1 },
     ];
 
     let currentPageId     = null;
@@ -535,10 +535,7 @@
     function getPage(id) { return storage.pages[id]; }
 
     function getVersionName(i) {
-      if (i === 1) return 'Readdy.AI';
-      if (i === 2) return 'AI版_v1';
-      if (i === 3) return 'AI版_v2';
-      return `AI版_v${i - 1}`;
+      return `AI_v${i}`;
     }
 
     function migrateVersionNames(pd) {
