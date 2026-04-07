@@ -468,12 +468,12 @@
     }
 
     function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)); } catch(e) { console.warn('localStorage save failed', e); }
       showSyncStatus('pending');
     }
 
     function saveQuiet() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(storage)); } catch(e) { console.warn('localStorage saveQuiet failed', e); }
     }
 
     async function compress(str) {
@@ -1039,6 +1039,7 @@
       if (zone.classList.contains('locked')) return;  // official locked after confirmation
       zone.classList.add('editing');
       rendered.contentEditable = 'true';
+      rendered.spellcheck = false;
       editDirty[which] = false;
       rendered.focus();
       const sel = window.getSelection();
@@ -1054,6 +1055,7 @@
       const rendered = document.getElementById(`${which}-rendered`);
       zone.classList.remove('editing');
       rendered.contentEditable = 'false';
+      rendered.spellcheck = false;
     }
 
     function saveEditZone(which) {
