@@ -137,8 +137,6 @@
     }
     .mobile-tab-btn { padding:8px 14px; font-size:13px; border:none; border-bottom:2px solid transparent; background:transparent; color:#64748b; cursor:pointer; font-weight:400; white-space:nowrap; transition:all .12s; }
     .mobile-tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:600; }
-    .mobile-merged-view table th:first-child,
-    .mobile-merged-view table td:first-child { display: none; }
 
     .overlay-box { background:#fff; border-radius:16px; width:100%; }
 
@@ -242,10 +240,12 @@
           <div style="border-bottom:1px solid #f1f5f9; padding:8px 14px; background:#f8fafc; flex-shrink:0; display:flex; align-items:center; gap:6px;">
             <span style="font-size:12px; font-weight:600; color:#374151; letter-spacing:.03em;">正式版</span>
             <span style="font-size:10.5px; color:#94a3b8; background:#f1f5f9; border-radius:4px; padding:1px 5px;">Official</span>
+            <button id="btn-merge-official" title="將正式版併入左側版本列（ESC 復原）" style="font-size:11px; padding:2px 8px; border:1px solid #e2e8f0; border-radius:6px; background:transparent; color:#64748b; cursor:pointer; white-space:nowrap; transition:all .15s; margin-left:2px;">合併</button>
             <div style="flex:1;"></div>
             <button id="btn-diff" title="顯示版本與正式版的差異" class="btn-icon" style="font-size:10px; font-weight:700; letter-spacing:-.5px;"
               onmouseover="if(!this.dataset.on){this.style.borderColor='#7c3aed';this.style.color='#7c3aed';this.style.background='#f5f3ff';}"
               onmouseout="if(!this.dataset.on){this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff';}">≠</button>
+            <button id="btn-desktop-merge-fields" class="md-toggle-btn" title="合併欄位：隱藏欄位名稱欄，只顯示文案值（ESC 復原）" style="font-size:11px; padding:3px 7px; letter-spacing:0; font-weight:400; color:#64748b;">合併欄位</button>
             <button id="btn-export-official" class="md-toggle-btn" title="下載 official.md（可提交至 versions 資料夾）">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </button>
@@ -440,8 +440,9 @@
     let confirmCb         = null;
     let collapseState     = {};
     let mobileActiveTab   = -1;
-    let editDirty         = { version: false, official: false };
-    let mergedFieldsMode  = false;
+    let editDirty              = { version: false, official: false };
+    let mergedOfficialMode     = false;
+    let prevVersionIdxBefore   = 0;
     let currentSectionAnchor = null;   // topmost visible H2 text when switching versions
     let sectionTrackerBound  = false;
 
@@ -817,6 +818,25 @@
       const container = document.getElementById('version-tabs');
       container.innerHTML = '';
 
+      // "正式版" tab — 只在合併模式下顯示（index -3）
+      if (mergedOfficialMode) {
+        const isOff = currentVersionIdx === -3;
+        const offWrap = document.createElement('div');
+        offWrap.className = 'tab-wrap';
+        offWrap.style.cssText = 'display:flex; align-items:center;';
+        const offTab = document.createElement('button');
+        offTab.className = 'tab-btn' + (isOff ? ' active' : '');
+        offTab.style.cssText = `padding:4px 11px; font-size:12.5px; border-radius:7px; cursor:pointer; font-weight:${isOff?'600':'400'}; background:${isOff?'#2563eb':'transparent'}; color:${isOff?'#fff':'#64748b'}; border:${isOff?'none':'1px solid #e2e8f0'}; transition:all .12s;`;
+        offTab.textContent = '正式版';
+        if (!isOff) {
+          offTab.onmouseover = () => { offTab.style.background='#f1f5f9'; offTab.style.color='#374151'; };
+          offTab.onmouseout  = () => { offTab.style.background='transparent'; offTab.style.color='#64748b'; };
+        }
+        offTab.addEventListener('click', () => { saveActiveEdit(); currentVersionIdx = -3; renderTabs(pd); renderVersionContent(pd); });
+        offWrap.appendChild(offTab);
+        container.appendChild(offWrap);
+      }
+
       // "原版" tab (always first, index -2)
       const origWrap = document.createElement('div');
       origWrap.className = 'tab-wrap';
@@ -969,6 +989,14 @@
       resetMdView('version');
       const el = document.getElementById('version-rendered');
       const mdToggleBtn = document.getElementById('btn-toggle-md-version');
+      if (currentVersionIdx === -3) {
+        // 合併模式：左側顯示正式版內容（唯讀）
+        if (mdToggleBtn) mdToggleBtn.style.display = 'none';
+        el.innerHTML = pd.official || '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（正式版尚未設定）</p>';
+        adjustTableLayouts(el);
+        exitEditZone('version');
+        return;
+      }
       if (currentVersionIdx === -2) {
         if (mdToggleBtn) mdToggleBtn.style.display = 'none';
         el.innerHTML = pd.original || '<p style="color:#94a3b8;font-size:13px;text-align:center;padding:40px 0;">（原版內容尚未填入）</p>';
@@ -1143,8 +1171,8 @@
     document.getElementById('official-rendered').addEventListener('blur', () => saveEditZone('official'));
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && mergedFieldsMode) {
-        toggleMergedFields(false);
+      if (e.key === 'Escape' && mergedOfficialMode) {
+        toggleMergedOfficial();
         return;
       }
       if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '9') {
@@ -1192,6 +1220,7 @@
       a.click();
       URL.revokeObjectURL(a.href);
     }
+    document.getElementById('btn-merge-official').addEventListener('click', toggleMergedOfficial);
     document.getElementById('btn-export-official').addEventListener('click', downloadOfficialMd);
 
     function updateReviewBtn(status) {
@@ -1528,29 +1557,6 @@
         });
       }
       bar.appendChild(trashBtn);
-
-      // 合併欄位 toggle button
-      const mergeBtn = document.createElement('button');
-      mergeBtn.id = 'btn-mobile-merge-fields';
-      mergeBtn.title = '合併欄位（隱藏欄位名稱，只顯示文案）';
-      mergeBtn.style.cssText = `padding:6px 9px; font-size:12px; border:1px solid ${mergedFieldsMode ? '#2563eb' : '#e2e8f0'}; border-radius:6px; background:${mergedFieldsMode ? '#eff6ff' : 'transparent'}; color:${mergedFieldsMode ? '#2563eb' : '#94a3b8'}; cursor:pointer; white-space:nowrap; font-weight:${mergedFieldsMode ? '600' : '400'}; flex-shrink:0; margin-left:4px; transition:all .15s;`;
-      mergeBtn.textContent = '合併欄位';
-      mergeBtn.addEventListener('click', () => toggleMergedFields());
-      bar.appendChild(mergeBtn);
-    }
-
-    function toggleMergedFields(force) {
-      if (force !== undefined) mergedFieldsMode = force;
-      else mergedFieldsMode = !mergedFieldsMode;
-      const rendered = document.getElementById('mobile-rendered');
-      if (rendered) rendered.classList.toggle('mobile-merged-view', mergedFieldsMode);
-      const btn = document.getElementById('btn-mobile-merge-fields');
-      if (btn) {
-        btn.style.border        = `1px solid ${mergedFieldsMode ? '#2563eb' : '#e2e8f0'}`;
-        btn.style.background    = mergedFieldsMode ? '#eff6ff' : 'transparent';
-        btn.style.color         = mergedFieldsMode ? '#2563eb' : '#94a3b8';
-        btn.style.fontWeight    = mergedFieldsMode ? '600' : '400';
-      }
     }
 
     function renderMobileContent(pd) {
@@ -1592,12 +1598,34 @@
       if (target) container.scrollTop = target.offsetTop;
     }
 
+    function toggleMergedOfficial() {
+      mergedOfficialMode = !mergedOfficialMode;
+      const panelOff  = document.getElementById('panel-official');
+      const dragH     = document.getElementById('drag-handle');
+      const mergeBtn  = document.getElementById('btn-merge-official');
+      if (mergedOfficialMode) {
+        // 隱藏右側正式版面板
+        panelOff.style.display = 'none';
+        dragH.style.display    = 'none';
+        prevVersionIdxBefore   = currentVersionIdx >= 0 ? currentVersionIdx : 0;
+        currentVersionIdx      = -3; // 顯示正式版 tab
+        if (mergeBtn) { mergeBtn.style.border='1px solid #2563eb'; mergeBtn.style.background='#eff6ff'; mergeBtn.style.color='#2563eb'; mergeBtn.style.fontWeight='600'; mergeBtn.title='還原雙欄顯示（ESC）'; }
+      } else {
+        // 還原雙欄
+        panelOff.style.display = '';
+        dragH.style.display    = '';
+        currentVersionIdx      = prevVersionIdxBefore;
+        if (mergeBtn) { mergeBtn.style.border='1px solid #e2e8f0'; mergeBtn.style.background='transparent'; mergeBtn.style.color='#64748b'; mergeBtn.style.fontWeight='400'; mergeBtn.title='將正式版併入左側版本列（ESC 復原）'; }
+      }
+      const pd = getPage(currentPageId);
+      if (pd) { renderTabs(pd); renderVersionContent(pd); }
+    }
+
     function switchMobileTab(tab) {
       const zone = document.getElementById('edit-zone-mobile');
       if (zone.classList.contains('editing')) saveMobileEditZone();
       const headingText = (tab !== -2 && mobileActiveTab !== -2) ? getMobileCurrentHeading() : null;
       mobileActiveTab = tab;
-      if (mergedFieldsMode) toggleMergedFields(false);
       const pd = getPage(currentPageId);
       renderMobileView(pd);
       scrollMobileToHeading(headingText);
