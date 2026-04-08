@@ -137,6 +137,8 @@
     }
     .mobile-tab-btn { padding:8px 14px; font-size:13px; border:none; border-bottom:2px solid transparent; background:transparent; color:#64748b; cursor:pointer; font-weight:400; white-space:nowrap; transition:all .12s; }
     .mobile-tab-btn.active { color:#2563eb; border-bottom-color:#2563eb; font-weight:600; }
+    .mobile-merged-view table th:first-child,
+    .mobile-merged-view table td:first-child { display: none; }
 
     .overlay-box { background:#fff; border-radius:16px; width:100%; }
 
@@ -439,6 +441,7 @@
     let collapseState     = {};
     let mobileActiveTab   = -1;
     let editDirty         = { version: false, official: false };
+    let mergedFieldsMode  = false;
     let currentSectionAnchor = null;   // topmost visible H2 text when switching versions
     let sectionTrackerBound  = false;
 
@@ -1140,6 +1143,10 @@
     document.getElementById('official-rendered').addEventListener('blur', () => saveEditZone('official'));
 
     document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && mergedFieldsMode) {
+        toggleMergedFields(false);
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '9') {
         const activeEl = document.activeElement;
         if (activeEl && (activeEl.isContentEditable || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'INPUT')) return;
@@ -1521,6 +1528,29 @@
         });
       }
       bar.appendChild(trashBtn);
+
+      // 合併欄位 toggle button
+      const mergeBtn = document.createElement('button');
+      mergeBtn.id = 'btn-mobile-merge-fields';
+      mergeBtn.title = '合併欄位（隱藏欄位名稱，只顯示文案）';
+      mergeBtn.style.cssText = `padding:6px 9px; font-size:12px; border:1px solid ${mergedFieldsMode ? '#2563eb' : '#e2e8f0'}; border-radius:6px; background:${mergedFieldsMode ? '#eff6ff' : 'transparent'}; color:${mergedFieldsMode ? '#2563eb' : '#94a3b8'}; cursor:pointer; white-space:nowrap; font-weight:${mergedFieldsMode ? '600' : '400'}; flex-shrink:0; margin-left:4px; transition:all .15s;`;
+      mergeBtn.textContent = '合併欄位';
+      mergeBtn.addEventListener('click', () => toggleMergedFields());
+      bar.appendChild(mergeBtn);
+    }
+
+    function toggleMergedFields(force) {
+      if (force !== undefined) mergedFieldsMode = force;
+      else mergedFieldsMode = !mergedFieldsMode;
+      const rendered = document.getElementById('mobile-rendered');
+      if (rendered) rendered.classList.toggle('mobile-merged-view', mergedFieldsMode);
+      const btn = document.getElementById('btn-mobile-merge-fields');
+      if (btn) {
+        btn.style.border        = `1px solid ${mergedFieldsMode ? '#2563eb' : '#e2e8f0'}`;
+        btn.style.background    = mergedFieldsMode ? '#eff6ff' : 'transparent';
+        btn.style.color         = mergedFieldsMode ? '#2563eb' : '#94a3b8';
+        btn.style.fontWeight    = mergedFieldsMode ? '600' : '400';
+      }
     }
 
     function renderMobileContent(pd) {
@@ -1567,6 +1597,7 @@
       if (zone.classList.contains('editing')) saveMobileEditZone();
       const headingText = (tab !== -2 && mobileActiveTab !== -2) ? getMobileCurrentHeading() : null;
       mobileActiveTab = tab;
+      if (mergedFieldsMode) toggleMergedFields(false);
       const pd = getPage(currentPageId);
       renderMobileView(pd);
       scrollMobileToHeading(headingText);
