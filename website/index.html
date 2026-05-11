@@ -1416,9 +1416,13 @@
 
       if (!mdMode[which]) {
         saveEditZone(which);
-        const html = document.getElementById(`${which}-rendered`).innerHTML;
+        const pd = getPage(currentPageId);
+        const savedHtml = which === 'version'
+          ? (pd?.versions[currentVersionIdx]?.content || '')
+          : (pd?.official || '');
+        const html = savedHtml || document.getElementById(`${which}-rendered`).innerHTML;
         try { textarea.value = makeTurndown().turndown(html); }
-        catch (e) { textarea.value = ''; }
+        catch (e) { console.warn('Turndown 轉換失敗', e); textarea.value = html; }
         editZone.style.display = 'none';
         textarea.style.display = 'block';
         textarea.focus();
